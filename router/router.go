@@ -52,21 +52,25 @@ func SetupRouter() *gin.Engine {
 	r.POST("/register", func(c *gin.Context) { handler.Register(c, db) })
 	r.POST("/login", func(c *gin.Context) { handler.Login(c, db) })
 
-	r.GET("/storefront/getPetsByShopifyCustomerID", func(c *gin.Context) {
-		handler.GetPetsByShopifyCustomerID(c, db)
-	})
+	// 定义 storefront 分组
+	storefront := r.Group("/storefront")
+	{
+		storefront.GET("/getPetsByShopifyCustomerID", func(c *gin.Context) {
+			handler.GetPetsByShopifyCustomerID(c, db)
+		})
 
-	r.POST("/storefront/addPet", func(c *gin.Context) {
-		handler.AddPet(c, db)
-	})
+		storefront.POST("/addPet", func(c *gin.Context) {
+			handler.AddPet(c, db)
+		})
 
-	r.POST("/storefront/updatePetById", func(c *gin.Context) {
-		handler.UpdatePetById(c, db)
-	})
+		storefront.POST("/updatePetById", func(c *gin.Context) {
+			handler.UpdatePetById(c, db)
+		})
 
-	r.POST("/storefront/DeletePetById", func(c *gin.Context) {
-		handler.DeletePetById(c, db)
-	})
+		storefront.POST("/deletePetById", func(c *gin.Context) {
+			handler.DeletePetById(c, db)
+		})
+	}
 
 	// 受保护接口
 	auth := r.Group("/api")

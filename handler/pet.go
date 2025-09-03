@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"time"
 
 	"hiccpet/service/model"
 
@@ -116,11 +115,16 @@ func DeletePetById(c *gin.Context, db *gorm.DB) {
 
 func UpdatePetById(c *gin.Context, db *gorm.DB) {
 	type UpdatePetRequest struct {
-		ShopifyCustomerId string `json:"shopifyCustomerId" binding:"required"`
-		PetId             uint   `json:"petId" binding:"required"`
-		Name              string `json:"name"`
-		Type              string `json:"type"`
-		Birthday          string `json:"birthday"`
+		ShopifyCustomerId     string `json:"shopifyCustomerId" binding:"required"`
+		PetId                 uint   `json:"petId" binding:"required"`
+		Phone                 string `json:"phone"`
+		PetName               string `json:"petName"`
+		PetType               string `json:"petType"`
+		Breed                 string `json:"breed"`
+		PetIns                string `json:"petIns"`
+		Birthday              string `json:"birthday"`
+		Gender                string `json:"gender"`
+		AdditionalInformation string `json:"additionalInformation"`
 	}
 
 	var req UpdatePetRequest
@@ -142,29 +146,25 @@ func UpdatePetById(c *gin.Context, db *gorm.DB) {
 	}
 
 	// 更新字段
-	updates := map[string]interface{}{}
-	if req.Name != "" {
-		updates["name"] = req.Name
-	}
-	if req.Type != "" {
-		updates["type"] = req.Type
-	}
-	if req.Birthday != "" {
-		if t, err := time.Parse("2006-01-02", req.Birthday); err == nil {
-			updates["birthday"] = t
-		} else {
-			response.Error(c, http.StatusBadRequest, "invalid birthday format, expected YYYY-MM-DD")
-			return
-		}
-	}
-
-	if len(updates) == 0 {
-		response.Error(c, http.StatusBadRequest, "no fields to update")
-		return
+	updates := model.Pet{
+		Phone:                 req.Phone,
+		PetName:               req.PetName,
+		PetType:               req.PetType,
+		Breed:                 req.Breed,
+		PetIns:                req.PetIns,
+		Birthday:              req.Birthday,
+		Gender:                req.Gender,
+		AdditionalInformation: req.AdditionalInformation,
 	}
 
 	if err := db.Model(&pet).Updates(updates).Error; err != nil {
 		response.Error(c, http.StatusInternalServerError, "failed to update pet")
+		return
+	}
+
+	// 返回最新数据
+	if err := db.First(&pet, pet.ID).Error; err != nil {
+		response.Error(c, http.StatusInternalServerError, "failed to fetch updated pet")
 		return
 	}
 
