@@ -54,6 +54,7 @@ func SetupRouter() *gin.Engine {
 
 	// 定义 storefront 分组
 	storefront := r.Group("/storefront")
+	storefront.Use(middleware.ShopifySessionAuth())
 	{
 		storefront.GET("/getPetsByShopifyCustomerID", func(c *gin.Context) {
 			handler.GetPetsByShopifyCustomerID(c, db)
