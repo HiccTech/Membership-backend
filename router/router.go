@@ -10,9 +10,23 @@ import (
 	"gorm.io/gorm"
 
 	"fmt"
-
 	"hiccpet/service/config"
+	"log"
 )
+
+func migrateDB(db *gorm.DB) {
+	model.Migrate(db)
+	model.MigrateStore(db)
+
+	if err := model.MigrateCustomer(db); err != nil {
+		log.Fatal("migrate customer error:", err)
+	}
+
+	if err := model.MigratePet(db); err != nil {
+		log.Fatal("migrate pet error:", err)
+	}
+
+}
 
 func SetupRouter() *gin.Engine {
 	// 初始化配置
@@ -29,8 +43,7 @@ func SetupRouter() *gin.Engine {
 		panic("failed to connect database")
 	}
 
-	model.Migrate(db)
-	model.MigrateStore(db)
+	migrateDB(db)
 
 	r := gin.Default()
 	r.Use(middleware.CorsMiddleware())
@@ -39,10 +52,27 @@ func SetupRouter() *gin.Engine {
 	r.POST("/register", func(c *gin.Context) { handler.Register(c, db) })
 	r.POST("/login", func(c *gin.Context) { handler.Login(c, db) })
 
+	r.POST("/storefront/getPets", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "This is protected data"})
+	})
+
+	r.POST("/storefront/addPet", func(c *gin.Context) {
+		handler.AddPet(c, db)
+	})
+
+	r.POST("/storefront/updatePet", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "This is protected data"})
+	})
+
+	r.POST("/storefront/deletePet", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "This is protected data"})
+	})
+
 	// 受保护接口
 	auth := r.Group("/api")
 	auth.Use(middleware.JWTAuthMiddleware())
 	{
+
 		auth.GET("/profile", func(c *gin.Context) {
 			c.JSON(200, gin.H{"message": "This is protected data"})
 		})
