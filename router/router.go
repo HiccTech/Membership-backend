@@ -52,8 +52,8 @@ func SetupRouter() *gin.Engine {
 	r.POST("/register", func(c *gin.Context) { handler.Register(c, db) })
 	r.POST("/login", func(c *gin.Context) { handler.Login(c, db) })
 
-	r.POST("/storefront/getPets", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "This is protected data"})
+	r.GET("/storefront/getPets", func(c *gin.Context) {
+		handler.GetPets(c, db)
 	})
 
 	r.POST("/storefront/addPet", func(c *gin.Context) {

@@ -63,5 +63,22 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 	}
 
 	response.Success(c, pet)
-	// c.JSON(http.StatusOK, gin.H{"message": "registration successful"})
+}
+
+func GetPets(c *gin.Context, db *gorm.DB) {
+
+	shopifyCustomerID := c.Query("shopifyCustomerID")
+	if shopifyCustomerID == "" {
+		response.Error(c, http.StatusBadRequest, "shopifyCustomerID is required")
+		return
+	}
+
+	var pets []model.Pet
+
+	if err := db.Where("shopify_customer_id = ?", shopifyCustomerID).Find(&pets).Error; err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to fetch pets")
+		return
+	}
+
+	response.Success(c, pets)
 }
