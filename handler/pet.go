@@ -65,7 +65,7 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 	response.Success(c, pet)
 }
 
-func GetPets(c *gin.Context, db *gorm.DB) {
+func GetPetsByShopifyCustomerID(c *gin.Context, db *gorm.DB) {
 
 	shopifyCustomerID := c.Query("shopifyCustomerID")
 	if shopifyCustomerID == "" {
