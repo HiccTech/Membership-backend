@@ -12,7 +12,7 @@ type Pet struct {
 	Birthday              string `json:"birthday"`
 	Gender                string `json:"gender"`
 	AdditionalInformation string `json:"additionalInformation"`
-	ShopifyCustomerID     string `gorm:"size:64;not null;index" json:"shopifyCustomerId"`
+	ShopifyCustomerId     string `gorm:"size:64;not null;index" json:"shopifyCustomerId"`
 }
 
 // 创建表

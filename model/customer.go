@@ -6,8 +6,8 @@ import (
 
 type Customer struct {
 	BaseModelNoID
-	ShopifyCustomerID string `gorm:"primaryKey;size:64"`
-	Pets              []Pet  `gorm:"foreignKey:ShopifyCustomerID;references:ShopifyCustomerID"`
+	ShopifyCustomerId string `gorm:"primaryKey;size:64"`
+	Pets              []Pet  `gorm:"foreignKey:ShopifyCustomerId;references:ShopifyCustomerId"`
 }
 
 func MigrateCustomer(db *gorm.DB) error {

@@ -60,8 +60,8 @@ func SetupRouter() *gin.Engine {
 		handler.AddPet(c, db)
 	})
 
-	r.POST("/storefront/updatePet", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "This is protected data"})
+	r.POST("/storefront/updatePetById", func(c *gin.Context) {
+		handler.UpdatePetById(c, db)
 	})
 
 	r.POST("/storefront/DeletePetById", func(c *gin.Context) {
