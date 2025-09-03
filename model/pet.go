@@ -3,16 +3,16 @@ package model
 import "gorm.io/gorm"
 
 type Pet struct {
-	gorm.Model
-	Phone                 string
-	PetName               string
-	PetType               string
-	Breed                 string
-	PetIns                string
-	Birthday              string
-	Gender                string
-	AdditionalInformation string
-	ShopifyCustomerID     string `gorm:"size:64;not null;index"`
+	BaseModel
+	Phone                 string `json:"phone"`
+	PetName               string `json:"petName"`
+	PetType               string `json:"petType"`
+	Breed                 string `json:"breed"`
+	PetIns                string `json:"petIns"`
+	Birthday              string `json:"birthday"`
+	Gender                string `json:"gender"`
+	AdditionalInformation string `json:"additionalInformation"`
+	ShopifyCustomerID     string `gorm:"size:64;not null;index" json:"shopifyCustomerId"`
 }
 
 // 创建表

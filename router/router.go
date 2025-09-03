@@ -64,8 +64,8 @@ func SetupRouter() *gin.Engine {
 		c.JSON(200, gin.H{"message": "This is protected data"})
 	})
 
-	r.POST("/storefront/deletePet", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "This is protected data"})
+	r.POST("/storefront/DeletePetById", func(c *gin.Context) {
+		handler.DeletePetById(c, db)
 	})
 
 	// 受保护接口

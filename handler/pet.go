@@ -82,3 +82,33 @@ func GetPetsByShopifyCustomerID(c *gin.Context, db *gorm.DB) {
 
 	response.Success(c, pets)
 }
+
+func DeletePetById(c *gin.Context, db *gorm.DB) {
+	var req struct {
+		Id                int    `json:"id" binding:"required"`
+		ShopifyCustomerID string `json:"shopifyCustomerID" binding:"required"`
+	}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 检查是否存在该客户的宠物
+	var pet model.Pet
+	if err := db.Where("id = ? AND shopify_customer_id = ?", req.Id, req.ShopifyCustomerID).First(&pet).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Error(c, http.StatusNotFound, "pet not found for this customer")
+		} else {
+			response.Error(c, http.StatusInternalServerError, "failed to query pet")
+		}
+		return
+	}
+
+	// 删除记录
+	if err := db.Delete(&pet).Error; err != nil {
+		response.Error(c, http.StatusInternalServerError, "failed to delete pet")
+		return
+	}
+
+	response.Success(c, "pet deleted successfully")
+}
