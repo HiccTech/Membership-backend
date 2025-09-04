@@ -9,6 +9,7 @@ var Cfg *Config
 type Config struct {
 	ShopEnv     string
 	StoreName   string
+	StoreDomain string
 	AccessToken string
 	DbDSN       string
 }
@@ -41,6 +42,7 @@ func LoadConfig() {
 	Cfg = &Config{
 		ShopEnv:     env,
 		StoreName:   shopCfg[env]["StoreName"],
+		StoreDomain: shopCfg[env]["StoreDomain"],
 		AccessToken: shopCfg[env]["AccessToken"],
 		DbDSN:       shopCfg[env]["DbDSN"],
 	}

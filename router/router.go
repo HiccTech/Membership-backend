@@ -87,6 +87,10 @@ func SetupRouter() *gin.Engine {
 		storefront.POST("/uploadPetAvatar", func(c *gin.Context) {
 			handler.UploadPetAvatar(c, db)
 		})
+
+		storefront.GET("/getStoreCreditBalance", func(c *gin.Context) {
+			handler.GetStoreCreditBalance(c, db)
+		})
 	}
 
 	// 受保护接口
