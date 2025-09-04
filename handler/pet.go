@@ -78,7 +78,8 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 
 func GetPetsByShopifyCustomerID(c *gin.Context, db *gorm.DB) {
 
-	shopifyCustomerId := c.Query("shopifyCustomerId")
+	shopifyCustomerId := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
+
 	if shopifyCustomerId == "" {
 		response.Error(c, http.StatusBadRequest, "shopifyCustomerId is required")
 		return
