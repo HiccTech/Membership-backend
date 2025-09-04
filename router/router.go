@@ -4,6 +4,8 @@ import (
 	"hiccpet/service/handler"
 	"hiccpet/service/middleware"
 	"hiccpet/service/model"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -28,7 +30,16 @@ func migrateDB(db *gorm.DB) {
 
 }
 
+func runStatic(r *gin.Engine) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	r.Static("/static", filepath.Join(cwd, "uploadPetImgs"))
+}
+
 func SetupRouter() *gin.Engine {
+
 	// 初始化配置
 	config.LoadConfig()
 	fmt.Println("当前环境 =", config.Cfg.ShopEnv)
@@ -47,6 +58,7 @@ func SetupRouter() *gin.Engine {
 
 	r := gin.Default()
 	r.Use(middleware.CorsMiddleware())
+	runStatic(r)
 
 	// 公共接口
 	r.POST("/register", func(c *gin.Context) { handler.Register(c, db) })
@@ -70,6 +82,10 @@ func SetupRouter() *gin.Engine {
 
 		storefront.POST("/deletePetById", func(c *gin.Context) {
 			handler.DeletePetById(c, db)
+		})
+
+		storefront.POST("/uploadPetAvatar", func(c *gin.Context) {
+			handler.UploadPetAvatar(c, db)
 		})
 	}
 

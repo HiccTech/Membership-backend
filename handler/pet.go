@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"path/filepath"
 
 	"hiccpet/service/model"
 
@@ -10,6 +11,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -169,4 +171,23 @@ func UpdatePetById(c *gin.Context, db *gorm.DB) {
 	}
 
 	response.Success(c, pet)
+}
+
+func UploadPetAvatar(c *gin.Context, db *gorm.DB) {
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	filename := uuid.New().String() + filepath.Ext(file.Filename)
+	savePath := "uploadPetImgs/" + filename
+
+	// 保存文件
+	if err := c.SaveUploadedFile(file, savePath); err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.Success(c, gin.H{"url": savePath})
 }
