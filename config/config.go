@@ -2,18 +2,34 @@ package config
 
 import (
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
-// 全局变量
 var Cfg *Config
 
 type Config struct {
 	ShopEnv     string
 	StoreName   string
 	AccessToken string
-	DBDsn       string
+	DbDSN       string
+}
+
+var shopCfg = map[string]map[string]string{
+	"testShop": {
+		"StoreName":   "Test Store",
+		"CountryCode": "test",
+		"StoreDomain": "test-store-hicc1.myshopify.com",
+		"AccessToken": "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",
+		"Admin":       "https://admin.shopify.com/store/test-store-hicc1",
+		"DbDSN":       "root:neo123456@tcp(127.0.0.1:3306)/membership_test?charset=utf8mb4&parseTime=True&loc=Local",
+	},
+	"sgShop": {
+		"StoreName":   "Prod Store",
+		"CountryCode": "prod",
+		"StoreDomain": "prod-store.myshopify.com",
+		"AccessToken": "shpat_prod_xxx",
+		"Admin":       "https://admin.shopify.com/store/prod-store",
+		"DbDSN":       "root:password@tcp(127.0.0.1:3306)/membership_prod?charset=utf8mb4&parseTime=True&loc=Local",
+	},
 }
 
 func LoadConfig() {
@@ -22,19 +38,11 @@ func LoadConfig() {
 		env = "testShop"
 	}
 
-	fileName := ".env." + env
-
-	err := godotenv.Load(fileName)
-
-	if err != nil {
-		panic("加载配置文件失败")
-	}
-
 	Cfg = &Config{
-		ShopEnv:     os.Getenv("SHOP_ENV"),
-		StoreName:   os.Getenv("StoreName"),
-		AccessToken: os.Getenv("AccessToken"),
-		DBDsn:       os.Getenv("DB_DSN"),
+		ShopEnv:     env,
+		StoreName:   shopCfg[env]["StoreName"],
+		AccessToken: shopCfg[env]["AccessToken"],
+		DbDSN:       shopCfg[env]["DbDSN"],
 	}
 
 }

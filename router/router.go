@@ -34,10 +34,10 @@ func SetupRouter() *gin.Engine {
 	fmt.Println("当前环境 =", config.Cfg.ShopEnv)
 	fmt.Println("店铺名称 =", config.Cfg.StoreName)
 	fmt.Println("token =", config.Cfg.AccessToken)
-	fmt.Println("数据库连接 =", config.Cfg.DBDsn)
+	fmt.Println("数据库连接 =", config.Cfg.DbDSN)
 
 	// 连接 MySQL
-	dsn := config.Cfg.DBDsn
+	dsn := config.Cfg.DbDSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
