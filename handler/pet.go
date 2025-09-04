@@ -19,10 +19,13 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 	var req struct {
 		ShopifyCustomerId     string `json:"shopifyCustomerId" binding:"required"`
 		Phone                 string `json:"phone"`
+		PetAvatarUrl          string `json:"petAvatarUrl"`
+		PetName               string `json:"petName"`
 		PetType               string `json:"petType"`
 		Breed                 string `json:"breed"`
 		PetIns                string `json:"petIns"`
 		Birthday              string `json:"birthday"`
+		Weight                string `json:"weight"`
 		Gender                string `json:"gender"`
 		AdditionalInformation string `json:"additionalInformation"`
 	}
@@ -51,10 +54,13 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 	pet := model.Pet{
 		ShopifyCustomerId:     req.ShopifyCustomerId,
 		Phone:                 req.Phone,
+		PetAvatarUrl:          req.PetAvatarUrl,
+		PetName:               req.PetName,
 		PetType:               req.PetType,
 		Breed:                 req.Breed,
 		PetIns:                req.PetIns,
 		Birthday:              req.Birthday,
+		Weight:                req.Weight,
 		Gender:                req.Gender,
 		AdditionalInformation: req.AdditionalInformation,
 	}
@@ -120,11 +126,13 @@ func UpdatePetById(c *gin.Context, db *gorm.DB) {
 		ShopifyCustomerId     string `json:"shopifyCustomerId" binding:"required"`
 		PetId                 uint   `json:"petId" binding:"required"`
 		Phone                 string `json:"phone"`
+		PetAvatarUrl          string `json:"petAvatarUrl"`
 		PetName               string `json:"petName"`
 		PetType               string `json:"petType"`
 		Breed                 string `json:"breed"`
 		PetIns                string `json:"petIns"`
 		Birthday              string `json:"birthday"`
+		Weight                string `json:"weight"`
 		Gender                string `json:"gender"`
 		AdditionalInformation string `json:"additionalInformation"`
 	}
@@ -150,11 +158,13 @@ func UpdatePetById(c *gin.Context, db *gorm.DB) {
 	// 更新字段
 	updates := model.Pet{
 		Phone:                 req.Phone,
+		PetAvatarUrl:          req.PetAvatarUrl,
 		PetName:               req.PetName,
 		PetType:               req.PetType,
 		Breed:                 req.Breed,
 		PetIns:                req.PetIns,
 		Birthday:              req.Birthday,
+		Weight:                req.Weight,
 		Gender:                req.Gender,
 		AdditionalInformation: req.AdditionalInformation,
 	}

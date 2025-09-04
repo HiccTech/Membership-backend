@@ -5,11 +5,13 @@ import "gorm.io/gorm"
 type Pet struct {
 	BaseModel
 	Phone                 string `json:"phone"`
+	PetAvatarUrl          string `json:"petAvatarUrl"`
 	PetName               string `json:"petName"`
 	PetType               string `json:"petType"`
 	Breed                 string `json:"breed"`
 	PetIns                string `json:"petIns"`
 	Birthday              string `json:"birthday"`
+	Weight                string `json:"weight"`
 	Gender                string `json:"gender"`
 	AdditionalInformation string `json:"additionalInformation"`
 	ShopifyCustomerId     string `gorm:"size:64;not null;index" json:"shopifyCustomerId"`
