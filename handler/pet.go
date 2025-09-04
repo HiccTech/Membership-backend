@@ -129,8 +129,7 @@ func DeletePetById(c *gin.Context, db *gorm.DB) {
 
 func UpdatePetById(c *gin.Context, db *gorm.DB) {
 	type UpdatePetRequest struct {
-		ShopifyCustomerId     string `json:"shopifyCustomerId" binding:"required"`
-		PetId                 uint   `json:"petId" binding:"required"`
+		Id                    uint   `json:"id" binding:"required"`
 		Phone                 string `json:"phone"`
 		PetAvatarUrl          string `json:"petAvatarUrl"`
 		PetName               string `json:"petName"`
@@ -149,9 +148,11 @@ func UpdatePetById(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	shopifyCustomerId := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
+
 	// 先查找该客户下的 pet
 	var pet model.Pet
-	if err := db.Where("id = ? AND shopify_customer_id = ?", req.PetId, req.ShopifyCustomerId).
+	if err := db.Where("id = ? AND shopify_customer_id = ?", req.Id, shopifyCustomerId).
 		First(&pet).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			response.Error(c, http.StatusNotFound, "pet not found for this customer")
