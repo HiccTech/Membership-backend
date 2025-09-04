@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"hiccpet/service/middleware"
 	"hiccpet/service/model"
 
 	"hiccpet/service/response"
@@ -17,7 +18,6 @@ import (
 
 func AddPet(c *gin.Context, db *gorm.DB) {
 	var req struct {
-		ShopifyCustomerId     string `json:"shopifyCustomerId" binding:"required"`
 		Phone                 string `json:"phone"`
 		PetAvatarUrl          string `json:"petAvatarUrl"`
 		PetName               string `json:"petName"`
@@ -29,17 +29,20 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 		Gender                string `json:"gender"`
 		AdditionalInformation string `json:"additionalInformation"`
 	}
+
+	shopifyCustomerId := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
+
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	var customer model.Customer
-	if err := db.First(&customer, "shopify_customer_id = ?", req.ShopifyCustomerId).Error; err != nil {
+	if err := db.First(&customer, "shopify_customer_id = ?", shopifyCustomerId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 如果不存在，则创建新 Customer
 			customer = model.Customer{
-				ShopifyCustomerId: req.ShopifyCustomerId,
+				ShopifyCustomerId: shopifyCustomerId,
 			}
 			if err := db.Create(&customer).Error; err != nil {
 				response.Error(c, http.StatusInternalServerError, "failed to create customer")
@@ -52,7 +55,7 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 	}
 
 	pet := model.Pet{
-		ShopifyCustomerId:     req.ShopifyCustomerId,
+		ShopifyCustomerId:     shopifyCustomerId,
 		Phone:                 req.Phone,
 		PetAvatarUrl:          req.PetAvatarUrl,
 		PetName:               req.PetName,
