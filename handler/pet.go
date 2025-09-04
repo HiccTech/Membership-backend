@@ -96,18 +96,20 @@ func GetPetsByShopifyCustomerID(c *gin.Context, db *gorm.DB) {
 }
 
 func DeletePetById(c *gin.Context, db *gorm.DB) {
+
 	var req struct {
-		Id                int    `json:"id" binding:"required"`
-		ShopifyCustomerId string `json:"shopifyCustomerId" binding:"required"`
+		Id int `json:"id" binding:"required"`
 	}
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	shopifyCustomerId := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
+
 	// 检查是否存在该客户的宠物
 	var pet model.Pet
-	if err := db.Where("id = ? AND shopify_customer_id = ?", req.Id, req.ShopifyCustomerId).First(&pet).Error; err != nil {
+	if err := db.Where("id = ? AND shopify_customer_id = ?", req.Id, shopifyCustomerId).First(&pet).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			response.Error(c, http.StatusNotFound, "pet not found for this customer")
 		} else {
