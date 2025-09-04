@@ -12,8 +12,8 @@ import (
 )
 
 func GetStoreCreditBalance(c *gin.Context, db *gorm.DB) {
-	claims := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims)
-	fmt.Println("Shopify customer ID:", claims.Sub)
+	id := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
+	fmt.Println("Shopify customer ID:", id)
 	query := `#graphql
 		query GetCustomer($id: ID!){
 			customer(id: $id) {
@@ -32,7 +32,7 @@ func GetStoreCreditBalance(c *gin.Context, db *gorm.DB) {
 		}`
 
 	resp, err := utils.CallShopifyGraphQL(query, map[string]interface{}{
-		"id": claims.Sub,
+		"id": id,
 	}, "")
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())

@@ -38,6 +38,9 @@ func runStatic(r *gin.Engine) {
 }
 
 func SetupRouter() *gin.Engine {
+	// 初始化配置
+	config.LoadConfig()
+
 	// 连接 MySQL
 	dsn := config.Cfg.DbDSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
