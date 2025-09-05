@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"hiccpet/service/config"
 	"io"
 	"net/http"
@@ -14,8 +15,9 @@ type GraphQLRequest struct {
 }
 
 type GraphQLResponse struct {
-	Data   json.RawMessage          `json:"data"`
-	Errors []map[string]interface{} `json:"errors,omitempty"`
+	Data       json.RawMessage          `json:"data"`
+	Errors     []map[string]interface{} `json:"errors,omitempty"`
+	Extensions map[string]interface{}   `json:"extensions,omitempty"`
 }
 
 // CallShopifyGraphQL 通用方法
@@ -49,6 +51,7 @@ func CallShopifyGraphQL(query string, variables map[string]interface{}, apiVersi
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
+	fmt.Println("Raw Response:", string(respBody))
 
 	var graphResp GraphQLResponse
 	if err := json.Unmarshal(respBody, &graphResp); err != nil {
