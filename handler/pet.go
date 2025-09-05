@@ -33,7 +33,8 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 	shopifyCustomerId := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -81,6 +82,7 @@ func GetPetsByShopifyCustomerID(c *gin.Context, db *gorm.DB) {
 	shopifyCustomerId := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
 
 	if shopifyCustomerId == "" {
+		// response.Error(c, http.StatusBadRequest, "shopifyCustomerId is required")
 		response.Error(c, http.StatusBadRequest, "shopifyCustomerId is required")
 		return
 	}
@@ -101,7 +103,8 @@ func DeletePetById(c *gin.Context, db *gorm.DB) {
 		Id int `json:"id" binding:"required"`
 	}
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -193,7 +196,8 @@ func UpdatePetById(c *gin.Context, db *gorm.DB) {
 func UploadPetAvatar(c *gin.Context, db *gorm.DB) {
 	file, err := c.FormFile("image")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
