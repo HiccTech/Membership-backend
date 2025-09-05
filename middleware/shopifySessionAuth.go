@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"fmt"
+	"hiccpet/service/response"
 	"net/http"
 	"strings"
 
@@ -23,20 +24,23 @@ func ShopifySessionAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "missing authorization header"})
+			// c.JSON(http.StatusUnauthorized, gin.H{"error": "missing authorization header"})
+			response.Error(c, http.StatusUnauthorized, "missing authorization header")
 			c.Abort()
 			return
 		}
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenStr == authHeader {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header"})
+			// c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header"})
+			response.Error(c, http.StatusUnauthorized, "invalid authorization header")
 			c.Abort()
 			return
 		}
 		claims, err := verifyShopifyToken(tokenStr)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token: " + err.Error()})
+			// c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token: " + err.Error()})
+			response.Error(c, http.StatusUnauthorized, "invalid token: "+err.Error())
 			c.Abort()
 			return
 		}
