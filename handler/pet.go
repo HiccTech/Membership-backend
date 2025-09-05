@@ -6,6 +6,7 @@ import (
 
 	"hiccpet/service/middleware"
 	"hiccpet/service/model"
+	"hiccpet/service/service"
 
 	"hiccpet/service/response"
 
@@ -73,6 +74,11 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 		response.Error(c, http.StatusBadRequest, "Failed to add pet")
 		return
 	}
+
+	// 发放权益
+	go func(customer model.Customer, pet model.Pet) {
+		_ = service.GrantPetBenefit(nil, db, &customer, &pet)
+	}(customer, pet)
 
 	response.Success(c, pet)
 }
@@ -210,5 +216,5 @@ func UploadPetAvatar(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	response.Success(c, gin.H{"url": savePath})
+	response.Success(c, gin.H{"url": "/" + filename})
 }
