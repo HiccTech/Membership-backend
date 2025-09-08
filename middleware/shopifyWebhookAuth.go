@@ -8,11 +8,18 @@ import (
 	"hiccpet/service/config"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
 
-// 返回 HMAC-SHA256 的原始 bytes（未编码）
+// 简单内存存储已处理的 Event ID（生产环境推荐用 Redis 或数据库）
+var processedEvents = struct {
+	sync.RWMutex
+	m map[string]bool
+}{m: make(map[string]bool)}
+
+// Shopify HMAC 验证
 func computeShopifyHMAC(message, key []byte) []byte {
 	mac := hmac.New(sha256.New, key)
 	mac.Write(message)
@@ -21,18 +28,16 @@ func computeShopifyHMAC(message, key []byte) []byte {
 
 func ShopifyWebhookAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 读取原始 body
 		body, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "cannot read body"})
 			return
 		}
 
-		// 读取后把 body 重置回去，供后续 handler 使用
+		// 读取后重置 body
 		c.Request.Body = io.NopCloser(bytes.NewReader(body))
-		c.Request.ContentLength = int64(len(body)) // 可选，保持 Content-Length 一致
 
-		// 取得 header 并解 base64
+		// 校验 HMAC
 		shopifySig := c.GetHeader("X-Shopify-Hmac-Sha256")
 		if shopifySig == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing signature"})
@@ -43,15 +48,34 @@ func ShopifyWebhookAuth() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid signature encoding"})
 			return
 		}
-
-		// 计算本地 hmac（原始 bytes）并比较
 		expected := computeShopifyHMAC(body, []byte(config.Cfg.WebhookSecret))
 		if !hmac.Equal(sig, expected) {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid signature"})
 			return
 		}
 
-		// 通过
+		// 幂等性检查
+		eventID := c.GetHeader("X-Shopify-Event-Id")
+		if eventID == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "missing event ID"})
+			return
+		}
+
+		processedEvents.RLock()
+		_, exists := processedEvents.m[eventID]
+		processedEvents.RUnlock()
+
+		if exists {
+			// 已处理过，直接返回 200 OK
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{"status": "duplicate event"})
+			return
+		}
+
+		// 标记为已处理
+		processedEvents.Lock()
+		processedEvents.m[eventID] = true
+		processedEvents.Unlock()
+
 		c.Next()
 	}
 }
