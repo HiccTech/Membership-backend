@@ -1,21 +1,51 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
-	"hiccpet/service/middleware"
 	"hiccpet/service/model"
-	"hiccpet/service/response"
 	"hiccpet/service/utils"
-	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func GrantPetBenefit(c *gin.Context, db *gorm.DB, customer *model.Customer, pet *model.Pet) error {
+type DiscountCode struct {
+	Title                       string `json:"title"`
+	Code                        string `json:"code"`
+	CustomerGetsValuePercentage int    `json:"customerGetsValuePercentage"`
+	CustomerGetsProductId       string `json:"customerGetsProductId"`
+	StartsAt                    string `json:"startsAt"`
+	EndsAt                      string `json:"endsAt"`
+	UsageLimit                  int    `json:"usageLimit"`
+}
 
-	id := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
-	fmt.Println("Shopify customer ID:", id)
+func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Customer, pet *model.Pet) error {
+
+	fmt.Println("Shopify customer ID:", shopifyCustomerId)
+
+	// discountCodes := []DiscountCode{
+	// 	{Title: "Pet Party Venue Rental1", Code: "DISCOUNT20251", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 10},
+	// 	{Title: "Pet Party Venue Rental2", Code: "DISCOUNT20252", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 1},
+	// 	{Title: "Pet Party Venue Rental3", Code: "DISCOUNT20253", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 3},
+	// }
+	// CreateDiscountCode(id, &discountCodes)
+
+	// TopupStoreCredit(id, "50.00")
+
+	jsonValue := map[string]interface{}{
+		"discounts": []map[string]interface{}{
+			{"id": 1, "code": "DISCOUNT20251"},
+			{"id": 2, "code": "DISCOUNT20252"},
+			{"id": 3, "code": "DISCOUNT20253"},
+		},
+	}
+
+	UpdateCustomerMetafield(shopifyCustomerId, jsonValue)
+
+	return nil
+}
+
+func CreateDiscountCode(shopifyCustomerId string, discountCodes *[]DiscountCode) error {
 	query := `#graphql
 			mutation CreateDiscountCode($basicCodeDiscount: DiscountCodeBasicInput!) {
 				discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
@@ -28,33 +58,120 @@ func GrantPetBenefit(c *gin.Context, db *gorm.DB, customer *model.Customer, pet 
 					}
 				}
 			}`
+	for i, d := range *discountCodes {
+		fmt.Println(i, d)
+
+		resp, err := utils.CallShopifyGraphQL(query, map[string]interface{}{
+			"basicCodeDiscount": map[string]interface{}{
+				"title": d.Title,
+				"code":  d.Code,
+				"customerSelection": map[string]interface{}{
+					"customers": map[string]interface{}{
+						"add": []string{shopifyCustomerId},
+					},
+				},
+				"customerGets": map[string]interface{}{
+					"value": map[string]interface{}{
+						"percentage": d.CustomerGetsValuePercentage,
+					},
+					"items": map[string]interface{}{
+						"all": false,
+						"products": map[string]interface{}{
+							"productsToAdd": []string{d.CustomerGetsProductId},
+						},
+					},
+				},
+				"startsAt":   d.StartsAt,
+				"endsAt":     d.EndsAt,
+				"usageLimit": d.UsageLimit,
+			},
+		}, "")
+		if err != nil {
+			fmt.Println("Error creating discount code:", err)
+		}
+		print(resp)
+
+	}
+	return nil
+
+}
+
+func TopupStoreCredit(shopifyCustomerId string, amount string) {
+	query := `#graphql
+			mutation storeCreditAccountCredit($id: ID!, $creditInput: StoreCreditAccountCreditInput!) {
+				storeCreditAccountCredit(id: $id, creditInput: $creditInput) {
+				storeCreditAccountTransaction {
+					amount {
+						amount
+						currencyCode
+					}
+					account {
+						id
+						balance {
+							amount
+							currencyCode
+						}
+					}
+				}
+				userErrors {
+					message
+					field
+				}
+				}
+			}`
 
 	resp, err := utils.CallShopifyGraphQL(query, map[string]interface{}{
-		"basicCodeDiscount": map[string]interface{}{
-			"title": "10%/ off selected items",
-			"code":  "DISCOUNT2024",
-			"customerSelection": map[string]interface{}{
-				"customers": map[string]interface{}{
-					"add": []string{id},
-				},
+		"id": shopifyCustomerId,
+		"creditInput": map[string]interface{}{
+			"creditAmount": map[string]interface{}{
+				"amount":       amount,
+				"currencyCode": "SGD",
 			},
-			"customerGets": map[string]interface{}{
-				"value": map[string]interface{}{
-					"percentage": 1,
-				},
-				"items": map[string]interface{}{
-					"all": true,
-				},
-			},
-			"startsAt":   "2025-09-01T00:00:00Z",
-			"endsAt":     "2025-12-31T23:59:59Z",
-			"usageLimit": 10,
 		},
 	}, "")
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
+		fmt.Println("Error top up:", err)
+	}
+	print(resp)
+}
+
+func UpdateCustomerMetafield(shopifyCustomerId string, value interface{}) {
+
+	data, _ := json.MarshalIndent(value, "", "  ")
+	fmt.Println("Metafield data to be updated:", string(data))
+
+	query := `#graphql
+		mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+			metafieldsSet(metafields: $metafields) {
+			metafields {
+				key
+				namespace
+				value
+				createdAt
+				updatedAt
+			}
+			userErrors {
+				field
+				message
+				code
+			}
+			}
+		}`
+
+	resp, err := utils.CallShopifyGraphQL(query, map[string]interface{}{
+		"metafields": []map[string]interface{}{
+			{
+				"key":       "discountcodejson",
+				"namespace": "custom",
+				"ownerId":   shopifyCustomerId,
+				"type":      "json",
+				"value":     string(data),
+			},
+		},
+	}, "")
+	if err != nil {
+		fmt.Println("Error top up:", err)
 	}
 	print(resp)
 
-	return nil
 }

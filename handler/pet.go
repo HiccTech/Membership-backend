@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"path/filepath"
 
@@ -75,10 +76,21 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	// 发放权益
-	go func(customer model.Customer, pet model.Pet) {
-		_ = service.GrantPetBenefit(c, db, &customer, &pet)
-	}(customer, pet)
+	var count int64
+	if err := db.Model(&model.Pet{}).
+		Where("shopify_customer_id = ?", shopifyCustomerId).
+		Count(&count).Error; err != nil {
+		fmt.Println("Query error:", err)
+	}
+
+	if count == 1 {
+		fmt.Println(count, " -----count")
+
+		// 发放权益
+		go func(customer model.Customer, pet model.Pet) {
+			_ = service.GrantPetBenefit(shopifyCustomerId, db, &customer, &pet)
+		}(customer, pet)
+	}
 
 	response.Success(c, pet)
 }
