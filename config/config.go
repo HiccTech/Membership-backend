@@ -21,7 +21,7 @@ var shopCfg = map[string]map[string]string{
 		"StoreDomain": "test-store-hicc1.myshopify.com",
 		"AccessToken": "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",
 		"Admin":       "https://admin.shopify.com/store/test-store-hicc1",
-		"DbDSN":       "root:neo123456@tcp(127.0.0.1:3306)/membership_test?charset=utf8mb4&parseTime=True&loc=Local",
+		"DbDSN":       "root:Neo123456!@tcp(127.0.0.1:3306)/membership_test?charset=utf8mb4&parseTime=True&loc=Local",
 	},
 	"sgShop": {
 		"StoreName":   "Prod Store",
