@@ -1,9 +1,12 @@
 package router
 
 import (
+	"fmt"
 	"hiccpet/service/handler"
 	"hiccpet/service/middleware"
 	"hiccpet/service/model"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -85,6 +88,12 @@ func SetupRouter() *gin.Engine {
 			handler.GetStoreCreditBalance(c, db)
 		})
 	}
+
+	r.POST("/webhook/orders", middleware.ShopifyWebhookAuth(), func(c *gin.Context) {
+		b, _ := io.ReadAll(c.Request.Body)
+		fmt.Println(string(b), " -----------------------")
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "data": string(b)})
+	})
 
 	auth := r.Group("/api")
 	auth.Use(middleware.JWTAuthMiddleware())
