@@ -77,7 +77,7 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 
 	// 发放权益
 	go func(customer model.Customer, pet model.Pet) {
-		_ = service.GrantPetBenefit(nil, db, &customer, &pet)
+		_ = service.GrantPetBenefit(c, db, &customer, &pet)
 	}(customer, pet)
 
 	response.Success(c, pet)
