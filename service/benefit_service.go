@@ -9,6 +9,11 @@ import (
 	"gorm.io/gorm"
 )
 
+type Perk struct {
+	StoreCredit  string
+	DiscountCode DiscountCode
+}
+
 type DiscountCode struct {
 	Title                       string `json:"title"`
 	Code                        string `json:"code"`
