@@ -35,7 +35,6 @@ type Discount struct {
 }
 
 func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Customer, pet *model.Pet) error {
-
 	fmt.Println("Shopify customer ID:", shopifyCustomerId)
 
 	// discountCodes := []DiscountCode{
@@ -158,6 +157,10 @@ func TopupStoreCredit(shopifyCustomerId string, amount string) {
 }
 
 func UpdateCustomerMetafield(shopifyCustomerId string, value []Discount) {
+
+	sseApp := NewSSEServer()
+	sseApp.PushToClient(shopifyCustomerId, "status:perks:pending")
+
 	// 查询已有折扣
 	queryMetafieldByCustomer := `#graphql
 		query ($id:ID!){
@@ -241,4 +244,6 @@ func UpdateCustomerMetafield(shopifyCustomerId string, value []Discount) {
 	}
 
 	fmt.Println(resp, "更新成功")
+	sseApp.PushToClient(shopifyCustomerId, "status:perks:done")
+
 }

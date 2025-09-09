@@ -5,6 +5,7 @@ import (
 	"hiccpet/service/handler"
 	"hiccpet/service/middleware"
 	"hiccpet/service/model"
+	"hiccpet/service/service"
 	"io"
 	"net/http"
 	"os"
@@ -56,6 +57,20 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CorsMiddleware())
 	runStatic(r)
+
+	sseApp := service.NewSSEServer()
+	r.GET("/sse", sseApp.Handler)
+
+	// 模拟每秒推送一次消息给 customer_id=123
+	// go func() {
+	// 	for {
+	// 		time.Sleep(1 * time.Second)
+	// 		msg := fmt.Sprintf("tick: %s", time.Now().Format("15:04:05"))
+	// 		sseApp.PushToClient("123", msg)
+	// 		sseApp.PushToClient("bob123", "hixx")
+	// 		sseApp.PushToClient("neo123", "hixx--neo")
+	// 	}
+	// }()
 
 	// 公共接口
 	r.POST("/register", func(c *gin.Context) { handler.Register(c, db) })
