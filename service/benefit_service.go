@@ -24,6 +24,11 @@ type DiscountCode struct {
 	UsageLimit                  int    `json:"usageLimit"`
 }
 
+type Discount struct {
+	Code string `json:"code"`
+	ID   int    `json:"id"`
+}
+
 func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Customer, pet *model.Pet) error {
 
 	fmt.Println("Shopify customer ID:", shopifyCustomerId)
@@ -37,15 +42,22 @@ func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Cust
 
 	// TopupStoreCredit(id, "50.00")
 
-	jsonValue := map[string]interface{}{
-		"discounts": []map[string]interface{}{
-			{"id": 1, "code": "DISCOUNT20251"},
-			{"id": 2, "code": "DISCOUNT20252"},
-			{"id": 3, "code": "DISCOUNT20253"},
-		},
-	}
+	// jsonValue := map[string]interface{}{
+	// 	"discounts": []map[string]interface{}{
+	// 		{"id": 1, "code": "DISCOUNT20251"},
+	// 		{"id": 2, "code": "DISCOUNT20252"},
+	// 		{"id": 3, "code": "DISCOUNT20253"},
+	// 	},
+	// }
 
-	UpdateCustomerMetafield(shopifyCustomerId, jsonValue)
+	discountCodes :=
+		[]Discount{
+			{ID: 1, Code: "DISCOUNT20251111"},
+			{ID: 2, Code: "DISCOUNT20252222"},
+			{ID: 3, Code: "DISCOUNT20253333"},
+		}
+
+	UpdateCustomerMetafield(shopifyCustomerId, discountCodes)
 
 	return nil
 }
@@ -140,26 +152,70 @@ func TopupStoreCredit(shopifyCustomerId string, amount string) {
 	print(resp)
 }
 
-func UpdateCustomerMetafield(shopifyCustomerId string, value interface{}) {
+func UpdateCustomerMetafield(shopifyCustomerId string, value []Discount) {
+	// 查询已有折扣
+	queryMetafieldByCustomer := `#graphql
+		query ($id:ID!){
+			customer(id: $id) {
+				id
+				email
+				discountcodejson:metafield(namespace:"custom",key:"discountcodejson"){
+					jsonValue
+				}
+			}
+		}`
 
-	data, _ := json.MarshalIndent(value, "", "  ")
-	fmt.Println("Metafield data to be updated:", string(data))
+	resp1, err := utils.CallShopifyGraphQL(queryMetafieldByCustomer, map[string]interface{}{
+		"id": shopifyCustomerId,
+	}, "")
+	if err != nil {
+		fmt.Println("Error query:", err)
+		return
+	}
 
+	var discountResp struct {
+		Customer struct {
+			ID               string `json:"id"`
+			Email            string `json:"email"`
+			DiscountCodeJson struct {
+				JsonValue [][]Discount `json:"jsonValue"` // 直接数组
+			} `json:"discountcodejson"`
+		} `json:"customer"`
+	}
+
+	if err := resp1.UnmarshalData(&discountResp); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Discounts:", discountResp.Customer.DiscountCodeJson.JsonValue)
+	fmt.Println(resp1, "查询成功")
+
+	// 合并已有折扣和新折扣
+	result := append([][]Discount{value}, discountResp.Customer.DiscountCodeJson.JsonValue...)
+
+	// Marshal 为 JSON 字符串
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshal JSON:", err)
+		return
+	}
+
+	// 更新 Shopify metafield
 	query := `#graphql
 		mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
 			metafieldsSet(metafields: $metafields) {
-			metafields {
-				key
-				namespace
-				value
-				createdAt
-				updatedAt
-			}
-			userErrors {
-				field
-				message
-				code
-			}
+				metafields {
+					key
+					namespace
+					value
+					createdAt
+					updatedAt
+				}
+				userErrors {
+					field
+					message
+					code
+				}
 			}
 		}`
 
@@ -175,8 +231,9 @@ func UpdateCustomerMetafield(shopifyCustomerId string, value interface{}) {
 		},
 	}, "")
 	if err != nil {
-		fmt.Println("Error top up:", err)
+		fmt.Println("Error update metafield:", err)
+		return
 	}
-	print(resp)
 
+	fmt.Println(resp, "更新成功")
 }

@@ -20,6 +20,19 @@ type GraphQLResponse struct {
 	Extensions map[string]interface{}   `json:"extensions,omitempty"`
 }
 
+func (r *GraphQLResponse) String() string {
+	pretty, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("GraphQLResponse(marshal error: %v)", err)
+	}
+	return string(pretty)
+}
+
+// 提供一个通用的方法，把 Data 解析成目标结构体
+func (r *GraphQLResponse) UnmarshalData(v interface{}) error {
+	return json.Unmarshal(r.Data, v)
+}
+
 // CallShopifyGraphQL 通用方法
 func CallShopifyGraphQL(query string, variables map[string]interface{}, apiVersion string) (*GraphQLResponse, error) {
 	reqBody := GraphQLRequest{
