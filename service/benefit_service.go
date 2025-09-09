@@ -25,8 +25,13 @@ type DiscountCode struct {
 }
 
 type Discount struct {
-	Code string `json:"code"`
-	ID   int    `json:"id"`
+	Title                       string `json:"title"`
+	Code                        string `json:"code"`
+	CustomerGetsValuePercentage int    `json:"customerGetsValuePercentage"`
+	CustomerGetsProductId       string `json:"customerGetsProductId"`
+	StartsAt                    string `json:"startsAt"`
+	EndsAt                      string `json:"endsAt"`
+	UsageLimit                  int    `json:"usageLimit"`
 }
 
 func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Customer, pet *model.Pet) error {
@@ -52,9 +57,9 @@ func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Cust
 
 	discountCodes :=
 		[]Discount{
-			{ID: 1, Code: "DISCOUNT20251111"},
-			{ID: 2, Code: "DISCOUNT20252222"},
-			{ID: 3, Code: "DISCOUNT20253333"},
+			{Title: "Pet Party Venue Rental1", Code: "DISCOUNT20251", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 10},
+			{Title: "Pet Party Venue Rental2", Code: "DISCOUNT20252", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 1},
+			{Title: "Pet Party Venue Rental3", Code: "DISCOUNT20253", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 3},
 		}
 
 	UpdateCustomerMetafield(shopifyCustomerId, discountCodes)
