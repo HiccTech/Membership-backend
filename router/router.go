@@ -103,6 +103,10 @@ func SetupRouter() *gin.Engine {
 			handler.GetStoreCreditBalance(c, db)
 		})
 
+		storefront.POST("/getCodeDiscountNodes", func(c *gin.Context) {
+			handler.GetCodeDiscountNodes(c, db)
+		})
+
 	}
 
 	r.POST("/webhook/orders", middleware.ShopifyWebhookAuth(), func(c *gin.Context) {

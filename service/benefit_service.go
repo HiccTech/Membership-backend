@@ -18,6 +18,7 @@ type Perk struct {
 }
 
 type DiscountCode struct {
+	ShopifyDiscountCodeNodeId   string `json:"shopifyDiscountCodeNodeId"`
 	Title                       string `json:"title"`
 	Code                        string `json:"code"`
 	CustomerGetsValuePercentage int    `json:"customerGetsValuePercentage"`
@@ -82,7 +83,6 @@ func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Cust
 			// {Title: "20% off Pet Party Venue Rental", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227725467829", StartsAt: start, EndsAt: end, UsageLimit: 3},
 		}
 
-	UpdateCustomerMetafield(shopifyCustomerId, &discountCodes)
 	CreateDiscountCode(shopifyCustomerId, &discountCodes)
 
 	return nil
@@ -101,8 +101,9 @@ func CreateDiscountCode(shopifyCustomerId string, discountCodes *[]DiscountCode)
 					}
 				}
 			}`
-	for i, d := range *discountCodes {
-		fmt.Println(i, d)
+	for i := range *discountCodes {
+		// fmt.Println(i, d)
+		d := &(*discountCodes)[i] // 取元素指针，确保修改写回切片
 
 		resp, err := utils.CallShopifyGraphQL(query, map[string]interface{}{
 			"basicCodeDiscount": map[string]interface{}{
@@ -132,9 +133,28 @@ func CreateDiscountCode(shopifyCustomerId string, discountCodes *[]DiscountCode)
 		if err != nil {
 			fmt.Println("Error creating discount code:", err)
 		}
-		print(resp)
+
+		type DiscountResp struct {
+			DiscountCodeBasicCreate struct {
+				CodeDiscountNode struct {
+					ID string `json:"id"`
+				} `json:"codeDiscountNode"`
+				UserErrors []interface{} `json:"userErrors"`
+			} `json:"discountCodeBasicCreate"`
+		}
+
+		var data DiscountResp
+		if err := json.Unmarshal(resp.Data, &data); err != nil {
+			fmt.Println("Error parse:", err)
+		}
+
+		fmt.Println("ID:", data.DiscountCodeBasicCreate.CodeDiscountNode.ID)
+		d.ShopifyDiscountCodeNodeId = data.DiscountCodeBasicCreate.CodeDiscountNode.ID
 
 	}
+
+	UpdateCustomerMetafield(shopifyCustomerId, discountCodes)
+
 	return nil
 
 }
