@@ -24,6 +24,7 @@ func GetCodeDiscountNodes(c *gin.Context, db *gorm.DB) {
 				query GetCodeDiscountNodes($query:String){
 					codeDiscountNodes(first: 250,query:$query) {
 						nodes {
+							id
 							codeDiscount {
 								... on DiscountCodeBasic {
 									title
