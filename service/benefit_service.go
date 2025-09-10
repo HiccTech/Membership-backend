@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"hiccpet/service/model"
 	"hiccpet/service/utils"
+	"math/rand"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -34,6 +36,35 @@ type Discount struct {
 	UsageLimit                  int    `json:"usageLimit"`
 }
 
+// GetTodayAndNextYear 返回新加坡时区今天零点和一年后的今天23:59:59 (RFC3339格式)
+func GetTodayAndNextYear() (string, string) {
+	// 加载新加坡时区
+	loc, _ := time.LoadLocation("Asia/Singapore")
+
+	now := time.Now().In(loc)
+
+	// 今天零点
+	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+
+	// 一年后的今天 23:59:59
+	end := start.AddDate(1, 0, 0).Add(-time.Second)
+
+	return start.Format(time.RFC3339), end.Format(time.RFC3339)
+}
+
+// 用独立随机源，避免全局 rand.Seed
+var rng = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+// 生成唯一 11 位数字
+func generate11Digits() string {
+	return fmt.Sprintf("%011d", rng.Int63n(1e11))
+}
+
+// 生成折扣码
+func generateDiscountCode(prefix string) string {
+	return prefix + generate11Digits()
+}
+
 func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Customer, pet *model.Pet) error {
 	fmt.Println("Shopify customer ID:", shopifyCustomerId)
 
@@ -53,15 +84,18 @@ func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Cust
 	// 		{"id": 3, "code": "DISCOUNT20253"},
 	// 	},
 	// }
-
+	start, end := GetTodayAndNextYear()
 	discountCodes :=
-		[]Discount{
-			{Title: "Pet Party Venue Rental1", Code: "DISCOUNT20251", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 10},
-			{Title: "Pet Party Venue Rental2", Code: "DISCOUNT20252", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 1},
-			{Title: "Pet Party Venue Rental3", Code: "DISCOUNT20253", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 3},
+		[]DiscountCode{
+			{Title: "Pet Party Venue Rental1", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 10},
+			{Title: "Pet Party Venue Rental2", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 1},
+			{Title: "Pet Party Venue Rental3", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 3},
+			{Title: "Pet Party Venue Rental4", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 3},
+			{Title: "Pet Party Venue Rental5", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 3},
 		}
 
-	UpdateCustomerMetafield(shopifyCustomerId, discountCodes)
+	UpdateCustomerMetafield(shopifyCustomerId, &discountCodes)
+	CreateDiscountCode(shopifyCustomerId, &discountCodes)
 
 	return nil
 }
@@ -156,10 +190,10 @@ func TopupStoreCredit(shopifyCustomerId string, amount string) {
 	print(resp)
 }
 
-func UpdateCustomerMetafield(shopifyCustomerId string, value []Discount) {
+func UpdateCustomerMetafield(shopifyCustomerId string, value *[]DiscountCode) {
 
 	sseApp := NewSSEServer()
-	sseApp.PushToClient(shopifyCustomerId, "status:perks:pending")
+	sseApp.PushToClient(shopifyCustomerId, "status:l:pending")
 
 	// 查询已有折扣
 	queryMetafieldByCustomer := `#graphql
@@ -186,7 +220,7 @@ func UpdateCustomerMetafield(shopifyCustomerId string, value []Discount) {
 			ID               string `json:"id"`
 			Email            string `json:"email"`
 			DiscountCodeJson struct {
-				JsonValue [][]Discount `json:"jsonValue"` // 直接数组
+				JsonValue [][]DiscountCode `json:"jsonValue"` // 直接数组
 			} `json:"discountcodejson"`
 		} `json:"customer"`
 	}
@@ -199,7 +233,7 @@ func UpdateCustomerMetafield(shopifyCustomerId string, value []Discount) {
 	fmt.Println(resp1, "查询成功")
 
 	// 合并已有折扣和新折扣
-	result := append([][]Discount{value}, discountResp.Customer.DiscountCodeJson.JsonValue...)
+	result := append([][]DiscountCode{*value}, discountResp.Customer.DiscountCodeJson.JsonValue...)
 
 	// Marshal 为 JSON 字符串
 	data, err := json.MarshalIndent(result, "", "  ")
@@ -244,6 +278,6 @@ func UpdateCustomerMetafield(shopifyCustomerId string, value []Discount) {
 	}
 
 	fmt.Println(resp, "更新成功")
-	sseApp.PushToClient(shopifyCustomerId, "status:perks:done")
+	sseApp.PushToClient(shopifyCustomerId, "status:l:created")
 
 }
