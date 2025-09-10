@@ -59,7 +59,7 @@ func SetupRouter() *gin.Engine {
 	runStatic(r)
 
 	sseApp := service.NewSSEServer()
-	r.GET("/sse", sseApp.Handler)
+	r.GET("/sse/club", sseApp.Handler)
 
 	// 模拟每秒推送一次消息给 customer_id=123
 	// go func() {

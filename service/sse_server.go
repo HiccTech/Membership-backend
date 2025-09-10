@@ -96,6 +96,9 @@ func (s *SSEServer) Handler(c *gin.Context) {
 	client := s.AddClient(customerID)
 	defer s.RemoveClient(customerID)
 
+	// 客户一连上就推送一条「已连接」的消息
+	client.channel <- `{"code":0,"message":"connected"}`
+
 	ctx := c.Request.Context()
 
 	for {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hiccpet/service/model"
+	"hiccpet/service/response"
 	"hiccpet/service/utils"
 	"math/rand"
 	"time"
@@ -68,30 +69,17 @@ func generateDiscountCode(prefix string) string {
 func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Customer, pet *model.Pet) error {
 	fmt.Println("Shopify customer ID:", shopifyCustomerId)
 
-	// discountCodes := []DiscountCode{
-	// 	{Title: "Pet Party Venue Rental1", Code: "DISCOUNT20251", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 10},
-	// 	{Title: "Pet Party Venue Rental2", Code: "DISCOUNT20252", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 1},
-	// 	{Title: "Pet Party Venue Rental3", Code: "DISCOUNT20253", CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: "2025-09-01T00:00:00Z", EndsAt: "2025-12-31T23:59:59Z", UsageLimit: 3},
-	// }
-	// CreateDiscountCode(id, &discountCodes)
-
 	// TopupStoreCredit(id, "50.00")
 
-	// jsonValue := map[string]interface{}{
-	// 	"discounts": []map[string]interface{}{
-	// 		{"id": 1, "code": "DISCOUNT20251"},
-	// 		{"id": 2, "code": "DISCOUNT20252"},
-	// 		{"id": 3, "code": "DISCOUNT20253"},
-	// 	},
-	// }
 	start, end := GetTodayAndNextYear()
 	discountCodes :=
 		[]DiscountCode{
-			{Title: "Pet Party Venue Rental1", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 10},
-			{Title: "Pet Party Venue Rental2", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 1},
-			{Title: "Pet Party Venue Rental3", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 3},
-			{Title: "Pet Party Venue Rental4", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 3},
-			{Title: "Pet Party Venue Rental5", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10217653829813", StartsAt: start, EndsAt: end, UsageLimit: 3},
+			{Title: "Birthday", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227744014517", StartsAt: start, EndsAt: end, UsageLimit: 10},
+			{Title: "1V1 Personalized Grooming Class", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227742015669", StartsAt: start, EndsAt: end, UsageLimit: 1},
+			// {Title: "Free Massage", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227740934325", StartsAt: start, EndsAt: end, UsageLimit: 3},
+			// {Title: "Free Aromatherapyor Grass Mud Spa", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227739754677", StartsAt: start, EndsAt: end, UsageLimit: 3},
+			{Title: "Sign-up Gift", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227738411189", StartsAt: start, EndsAt: end, UsageLimit: 3},
+			// {Title: "20% off Pet Party Venue Rental", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227725467829", StartsAt: start, EndsAt: end, UsageLimit: 3},
 		}
 
 	UpdateCustomerMetafield(shopifyCustomerId, &discountCodes)
@@ -193,7 +181,7 @@ func TopupStoreCredit(shopifyCustomerId string, amount string) {
 func UpdateCustomerMetafield(shopifyCustomerId string, value *[]DiscountCode) {
 
 	sseApp := NewSSEServer()
-	sseApp.PushToClient(shopifyCustomerId, "status:l:pending")
+	sseApp.PushToClient(shopifyCustomerId, `{"code":0,"message":"pending"}`)
 
 	// 查询已有折扣
 	queryMetafieldByCustomer := `#graphql
@@ -277,7 +265,7 @@ func UpdateCustomerMetafield(shopifyCustomerId string, value *[]DiscountCode) {
 		return
 	}
 
+	createdValueJson, _ := json.Marshal(response.Response{Data: value, Message: "succcess", Code: 0})
 	fmt.Println(resp, "更新成功")
-	sseApp.PushToClient(shopifyCustomerId, "status:l:created")
-
+	sseApp.PushToClient(shopifyCustomerId, string(createdValueJson))
 }
