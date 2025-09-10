@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"hiccpet/service/middleware"
+	"hiccpet/service/response"
 	"net/http"
 	"sync"
 
@@ -67,7 +69,15 @@ func (s *SSEServer) PushToClient(customerID, msg string) {
 
 // Gin SSE Handler
 func (s *SSEServer) Handler(c *gin.Context) {
-	customerID := c.Query("customer_id")
+
+	claims, err := middleware.VerifyShopifyToken(c.Query("token"))
+	if err != nil {
+		response.Error(c, http.StatusUnauthorized, "invalid token: "+err.Error())
+		c.Abort()
+		return
+	}
+	customerID := claims.Sub
+	// customerID := c.Query("token")
 	if customerID == "" {
 		c.String(http.StatusBadRequest, "missing customer_id")
 		return

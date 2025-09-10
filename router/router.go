@@ -102,6 +102,7 @@ func SetupRouter() *gin.Engine {
 		storefront.GET("/getStoreCreditBalance", func(c *gin.Context) {
 			handler.GetStoreCreditBalance(c, db)
 		})
+
 	}
 
 	r.POST("/webhook/orders", middleware.ShopifyWebhookAuth(), func(c *gin.Context) {

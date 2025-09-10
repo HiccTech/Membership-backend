@@ -37,7 +37,7 @@ func ShopifySessionAuth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		claims, err := verifyShopifyToken(tokenStr)
+		claims, err := VerifyShopifyToken(tokenStr)
 		if err != nil {
 			// c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token: " + err.Error()})
 			response.Error(c, http.StatusUnauthorized, "invalid token: "+err.Error())
@@ -52,7 +52,7 @@ func ShopifySessionAuth() gin.HandlerFunc {
 }
 
 // 验证 Shopify session token
-func verifyShopifyToken(tokenStr string) (*ShopifyClaims, error) {
+func VerifyShopifyToken(tokenStr string) (*ShopifyClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &ShopifyClaims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
