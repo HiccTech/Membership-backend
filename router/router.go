@@ -1,13 +1,10 @@
 package router
 
 import (
-	"fmt"
 	"hiccpet/service/handler"
 	"hiccpet/service/middleware"
 	"hiccpet/service/model"
 	"hiccpet/service/service"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -110,9 +107,7 @@ func SetupRouter() *gin.Engine {
 	}
 
 	r.POST("/webhook/orders", middleware.ShopifyWebhookAuth(), func(c *gin.Context) {
-		b, _ := io.ReadAll(c.Request.Body)
-		fmt.Println(string(b), " -----------------------")
-		c.JSON(http.StatusOK, gin.H{"status": "ok", "data": string(b)})
+		handler.HandleTopUp(c, db)
 	})
 
 	auth := r.Group("/api")

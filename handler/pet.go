@@ -83,7 +83,7 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 		fmt.Println("Query error:", err)
 	}
 
-	if count >= 1 {
+	if count == 1 {
 		fmt.Println(count, " -----count")
 
 		// 发放权益
