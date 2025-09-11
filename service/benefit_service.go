@@ -58,13 +58,13 @@ func GetTodayAndNextYear() (string, string) {
 var rng = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // 生成唯一 11 位数字
-func generate11Digits() string {
+func Generate11Digits() string {
 	return fmt.Sprintf("%011d", rng.Int63n(1e11))
 }
 
 // 生成折扣码
-func generateDiscountCode(prefix string) string {
-	return prefix + generate11Digits()
+func GenerateDiscountCode(prefix string) string {
+	return prefix + Generate11Digits()
 }
 
 func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Customer, pet *model.Pet) error {
@@ -75,12 +75,10 @@ func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Cust
 	start, end := GetTodayAndNextYear()
 	discountCodes :=
 		[]DiscountCode{
-			{Title: "Birthday", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227744014517", StartsAt: start, EndsAt: end, UsageLimit: 10},
-			{Title: "1V1 Personalized Grooming Class", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227742015669", StartsAt: start, EndsAt: end, UsageLimit: 1},
-			// {Title: "Free Massage", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227740934325", StartsAt: start, EndsAt: end, UsageLimit: 3},
-			// {Title: "Free Aromatherapyor Grass Mud Spa", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227739754677", StartsAt: start, EndsAt: end, UsageLimit: 3},
-			{Title: "Sign-up Gift", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227738411189", StartsAt: start, EndsAt: end, UsageLimit: 3},
-			// {Title: "20% off Pet Party Venue Rental", Code: generateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227725467829", StartsAt: start, EndsAt: end, UsageLimit: 3},
+			{Title: "Birthday", Code: GenerateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227744014517", StartsAt: start, EndsAt: end, UsageLimit: 1},
+			{Title: "1V1 Personalized Grooming Class", Code: GenerateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227742015669", StartsAt: start, EndsAt: end, UsageLimit: 1},
+			{Title: "Sign-up Gift", Code: GenerateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227738411189", StartsAt: start, EndsAt: end, UsageLimit: 1},
+			{Title: "20% off Pet Party Venue Rental", Code: GenerateDiscountCode("L"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227725467829", StartsAt: start, EndsAt: end, UsageLimit: 1},
 		}
 
 	CreateDiscountCode(shopifyCustomerId, &discountCodes)

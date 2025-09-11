@@ -60,6 +60,7 @@ func HandleTopUp(c *gin.Context, db *gorm.DB) {
 	fmt.Printf("订单ID: %d\n", order.ID)
 
 	customerId := order.Customer.AdminGraphqlApiId
+	start, end := service.GetTodayAndNextYear()
 
 forLoop:
 	for _, item := range order.LineItems {
@@ -75,11 +76,21 @@ forLoop:
 			// 充值1000
 			println("充值1000")
 			service.TopupStoreCredit(customerId, "1000")
+			service.CreateDiscountCode(customerId, &[]service.DiscountCode{
+				{Title: "Free Massage 10 sessions", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227740934325", StartsAt: start, EndsAt: end, UsageLimit: 10},
+				{Title: "Free Aromatherapyor Grass Mud Spa", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227739754677", StartsAt: start, EndsAt: end, UsageLimit: 1},
+				{Title: "Pet Party Venue Rental Free 1h", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227792937141", StartsAt: start, EndsAt: end, UsageLimit: 1},
+			})
 			break forLoop
 		case 10228688453813:
 			// 充值2000
 			println("充值2000")
 			service.TopupStoreCredit(customerId, "2000")
+			service.CreateDiscountCode(customerId, &[]service.DiscountCode{
+				{Title: "Free Massage 20 sessions", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227793035445", StartsAt: start, EndsAt: end, UsageLimit: 20},
+				{Title: "Free Aromatherapyor Grass Mud Spa", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227739754677", StartsAt: start, EndsAt: end, UsageLimit: 1},
+				{Title: "Pet Party Venue Rental Free 3h", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227792969909", StartsAt: start, EndsAt: end, UsageLimit: 1},
+			})
 			break forLoop
 		default:
 
