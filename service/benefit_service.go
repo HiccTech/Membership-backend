@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"hiccpet/service/model"
-	"hiccpet/service/response"
 	"hiccpet/service/utils"
 	"math/rand"
 	"time"
@@ -198,8 +197,8 @@ func TopupStoreCredit(shopifyCustomerId string, amount string) {
 
 func UpdateCustomerMetafield(shopifyCustomerId string, value *[]DiscountCode) {
 
-	sseApp := NewSSEServer()
-	sseApp.PushToClient(shopifyCustomerId, `{"code":0,"message":"pending"}`)
+	// sseApp := NewSSEServer()
+	// sseApp.PushToClient(shopifyCustomerId, `{"code":0,"message":"pending"}`)
 
 	// 查询已有折扣
 	queryMetafieldByCustomer := `#graphql
@@ -283,7 +282,7 @@ func UpdateCustomerMetafield(shopifyCustomerId string, value *[]DiscountCode) {
 		return
 	}
 
-	createdValueJson, _ := json.Marshal(response.Response{Data: value, Message: "succcess", Code: 0})
+	// createdValueJson, _ := json.Marshal(response.Response{Data: value, Message: "succcess", Code: 0})
 	fmt.Println(resp, "更新成功")
-	sseApp.PushToClient(shopifyCustomerId, string(createdValueJson))
+	// sseApp.PushToClient(shopifyCustomerId, string(createdValueJson))
 }

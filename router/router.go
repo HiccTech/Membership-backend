@@ -4,7 +4,6 @@ import (
 	"hiccpet/service/handler"
 	"hiccpet/service/middleware"
 	"hiccpet/service/model"
-	"hiccpet/service/service"
 	"os"
 	"path/filepath"
 
@@ -55,19 +54,8 @@ func SetupRouter() *gin.Engine {
 	r.Use(middleware.CorsMiddleware())
 	runStatic(r)
 
-	sseApp := service.NewSSEServer()
-	r.GET("/sse/club", sseApp.Handler)
-
-	// 模拟每秒推送一次消息给 customer_id=123
-	// go func() {
-	// 	for {
-	// 		time.Sleep(1 * time.Second)
-	// 		msg := fmt.Sprintf("tick: %s", time.Now().Format("15:04:05"))
-	// 		sseApp.PushToClient("123", msg)
-	// 		sseApp.PushToClient("bob123", "hixx")
-	// 		sseApp.PushToClient("neo123", "hixx--neo")
-	// 	}
-	// }()
+	// sseApp := service.NewSSEServer()
+	// r.GET("/sse/club", sseApp.Handler)
 
 	// 公共接口
 	r.POST("/register", func(c *gin.Context) { handler.Register(c, db) })
@@ -114,8 +102,8 @@ func SetupRouter() *gin.Engine {
 	auth.Use(middleware.JWTAuthMiddleware())
 	{
 
-		auth.POST("/addStore", func(c *gin.Context) { handler.AddStore(c, db) })
-		auth.GET("/getStores", func(c *gin.Context) { handler.GetStores(c, db) })
+		// auth.POST("/addStore", func(c *gin.Context) { handler.AddStore(c, db) })
+		// auth.GET("/getStores", func(c *gin.Context) { handler.GetStores(c, db) })
 	}
 
 	return r
