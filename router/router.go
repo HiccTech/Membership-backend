@@ -27,6 +27,10 @@ func migrateDB(db *gorm.DB) {
 		log.Fatal("migrate pet error:", err)
 	}
 
+	if err := model.MigrateTopup(db); err != nil {
+		log.Fatal("migrate topup error:", err)
+	}
+
 }
 
 func runStatic(r *gin.Engine) {

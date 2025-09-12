@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"hiccpet/service/model"
 	"hiccpet/service/response"
 	"hiccpet/service/service"
 	"io"
@@ -75,6 +76,7 @@ forLoop:
 		case 10228688158901:
 			// 充值1000
 			println("充值1000")
+			storeTopup(c, db, 1, customerId, &order)
 			service.TopupStoreCredit(customerId, "1000")
 			service.CreateDiscountCode(customerId, &[]service.DiscountCode{
 				{Title: "Free Massage 10 sessions", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227740934325", StartsAt: start, EndsAt: end, UsageLimit: 10},
@@ -85,6 +87,7 @@ forLoop:
 		case 10228688453813:
 			// 充值2000
 			println("充值2000")
+			storeTopup(c, db, 2, customerId, &order)
 			service.TopupStoreCredit(customerId, "2000")
 			service.CreateDiscountCode(customerId, &[]service.DiscountCode{
 				{Title: "Free Massage 20 sessions", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227793035445", StartsAt: start, EndsAt: end, UsageLimit: 20},
@@ -98,4 +101,18 @@ forLoop:
 	}
 
 	response.Success(c, "充值成功")
+}
+
+func storeTopup(c *gin.Context, db *gorm.DB, topupType int, shopifyCustomerId string, order *Order) {
+	topup := model.Topup{
+		OrderId:           order.ID,
+		Type:              topupType,
+		ShopifyCustomerId: shopifyCustomerId,
+		Email:             order.Customer.Email,
+	}
+
+	if err := db.Create(&topup).Error; err != nil {
+		response.Error(c, http.StatusBadRequest, "Failed to add topup")
+		return
+	}
 }
