@@ -22,11 +22,12 @@ func GetCodeDiscountNodes(c *gin.Context, db *gorm.DB) {
 
 	query := `#graphql
 				query GetCodeDiscountNodes($query:String){
-					codeDiscountNodes(first: 250,query:$query) {
+					codeDiscountNodes(first: 250,query:$query,reverse:true) {
 						nodes {
 							id
 							codeDiscount {
 								... on DiscountCodeBasic {
+									asyncUsageCount
 									title
 									startsAt
 									endsAt
