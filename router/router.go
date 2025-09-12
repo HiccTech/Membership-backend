@@ -96,6 +96,10 @@ func SetupRouter() *gin.Engine {
 			handler.GetCodeDiscountNodes(c, db)
 		})
 
+		storefront.GET("topupCount", func(c *gin.Context) {
+			handler.TopupCount(c, db)
+		})
+
 	}
 
 	r.POST("/webhook/orders", middleware.ShopifyWebhookAuth(), func(c *gin.Context) {

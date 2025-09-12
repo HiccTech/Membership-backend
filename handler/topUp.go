@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"hiccpet/service/middleware"
 	"hiccpet/service/model"
 	"hiccpet/service/response"
 	"hiccpet/service/service"
@@ -115,4 +116,30 @@ func storeTopup(c *gin.Context, db *gorm.DB, topupType int, shopifyCustomerId st
 		response.Error(c, http.StatusBadRequest, "Failed to add topup")
 		return
 	}
+}
+
+func TopupCount(c *gin.Context, db *gorm.DB) {
+
+	shopifyCustomerId := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
+
+	if shopifyCustomerId == "" {
+		response.Error(c, http.StatusBadRequest, "shopifyCustomerId is required")
+		return
+	}
+
+	var count1 int64
+	if err := db.Model(&model.Topup{}).
+		Where("shopify_customer_id = ?", shopifyCustomerId).Where("type = ?", 1).
+		Count(&count1).Error; err != nil {
+		fmt.Println("Query error:", err)
+	}
+
+	var count2 int64
+	if err := db.Model(&model.Topup{}).
+		Where("shopify_customer_id = ?", shopifyCustomerId).Where("type = ?", 2).
+		Count(&count2).Error; err != nil {
+		fmt.Println("Query error:", err)
+	}
+
+	response.Success(c, gin.H{"count1": count1, "count2": count2})
 }
