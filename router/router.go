@@ -6,6 +6,7 @@ import (
 	"hiccpet/service/model"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -47,9 +48,18 @@ func SetupRouter() *gin.Engine {
 
 	// 连接 MySQL
 	dsn := config.Cfg.DbDSN
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	var db *gorm.DB
+	var err error
+	for i := 0; i < 10; i++ { // 最多尝试 10 次
+		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		if err == nil {
+			break
+		}
+		log.Println("Waiting for database to be ready...", err)
+		time.Sleep(2 * time.Second) // 每 2 秒尝试一次
+	}
 	if err != nil {
-		panic("failed to connect database")
+		log.Fatal("failed to connect to database after retries:", err)
 	}
 
 	migrateDB(db)
