@@ -15,26 +15,19 @@ type DiscountCode struct {
 }
 
 type EmailData struct {
+	To            string
 	Subject       string
 	DiscountCodes []DiscountCode
 }
 
-func SendClubEmail() {
+func SendClubEmail(emailData EmailData) {
 
 	tmpl, err := template.ParseFiles("email/clubEmail.tmpl")
 	if err != nil {
 		panic(err)
 	}
 
-	data := EmailData{
-		Subject: "通知：您已加入Hiccpet Club会员",
-		DiscountCodes: []DiscountCode{
-			{Title: "生日礼遇", Code: "BIRTHDAY2024", Period: "2025/09/03 - 2026/09/03"},
-			{Title: "1V1宠物美容课程", Code: "GROOMING2024", Period: "2025/09/03 - 2026/09/03"},
-			{Title: "新会员注册礼", Code: "WELCOME2024", Period: "2025/09/03 - 2026/09/03"},
-			{Title: "宠物派对场地租赁8折优惠", Code: "PARTY20OFF", Period: "2025/09/03 - 2026/09/03"},
-		},
-	}
+	data := emailData
 
 	var body bytes.Buffer
 	if err := tmpl.Execute(&body, data); err != nil {
@@ -44,7 +37,7 @@ func SendClubEmail() {
 	from := "neo@hiccpet.com"
 	password := "Lijian@2025"
 
-	to := "812284688@qq.com"
+	to := emailData.To
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", from)

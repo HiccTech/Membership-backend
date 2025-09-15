@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"hiccpet/service/email"
 	"hiccpet/service/model"
 	"hiccpet/service/utils"
 	"math/rand"
@@ -82,6 +83,7 @@ func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Cust
 
 	CreateDiscountCode(shopifyCustomerId, &discountCodes)
 	AddTagsToCustomer(shopifyCustomerId, "Club")
+	SendEmail(shopifyCustomerId, "", &discountCodes)
 
 	return nil
 }
@@ -309,4 +311,82 @@ func AddTagsToCustomer(shopifyCustomerId string, tags string) {
 		fmt.Println("Failed to add tags:", err)
 	}
 	print(resp)
+}
+
+func SendEmail(shopifyCustomerId string, customerEmail string, discountCodes *[]DiscountCode) {
+	emailAddr := customerEmail
+
+	if emailAddr == "" {
+		query := `#graphql
+        query ($id:ID!){
+            customer(id: $id) {
+                id
+                email
+            }
+        }`
+
+		resp1, err := utils.CallShopifyGraphQL(query, map[string]interface{}{
+			"id": shopifyCustomerId,
+		}, "")
+		if err != nil {
+			fmt.Println("Error query:", err)
+			return
+		}
+
+		var result struct {
+			Customer struct {
+				ID    string `json:"id"`
+				Email string `json:"email"`
+			} `json:"customer"`
+		}
+
+		if err := resp1.UnmarshalData(&result); err != nil {
+			panic(err)
+		}
+
+		if result.Customer.Email == "" {
+			fmt.Println("Customer has no email")
+			return
+		}
+
+		emailAddr = result.Customer.Email
+		fmt.Println("查询成功:", emailAddr)
+	}
+
+	newCodes := make([]email.DiscountCode, 0, len(*discountCodes))
+
+	for _, c := range *discountCodes {
+		period, err := formatPeriod(c.StartsAt, c.EndsAt)
+		if err == nil {
+			newCodes = append(newCodes, email.DiscountCode{
+				Title:  c.Title,
+				Code:   c.Code,
+				Period: period,
+			})
+		}
+	}
+
+	email.SendClubEmail(email.EmailData{
+		To:            emailAddr,
+		Subject:       "Welcome to Hiccpet Club Membership",
+		DiscountCodes: newCodes,
+	})
+
+}
+
+func formatPeriod(start, end string) (string, error) {
+	// 解析 RFC3339
+	startTime, err := time.Parse(time.RFC3339, start)
+	if err != nil {
+		return "", err
+	}
+	endTime, err := time.Parse(time.RFC3339, end)
+	if err != nil {
+		return "", err
+	}
+
+	// 格式化成 YYYY-MM-DD
+	return fmt.Sprintf("%s – %s",
+		startTime.Format("2006-01-02"),
+		endTime.Format("2006-01-02")), nil
 }
