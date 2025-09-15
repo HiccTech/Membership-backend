@@ -84,6 +84,7 @@ forLoop:
 				{Title: "Free Aromatherapyor Grass Mud Spa", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227739754677", StartsAt: start, EndsAt: end, UsageLimit: 1},
 				{Title: "Pet Party Venue Rental Free 1h", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227792937141", StartsAt: start, EndsAt: end, UsageLimit: 1},
 			})
+			service.AddTagsToCustomer(customerId, "Club 1000")
 			break forLoop
 		case 10228688453813:
 			// 充值2000
@@ -95,6 +96,7 @@ forLoop:
 				{Title: "Free Aromatherapyor Grass Mud Spa", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227739754677", StartsAt: start, EndsAt: end, UsageLimit: 1},
 				{Title: "Pet Party Venue Rental Free 3h", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227792969909", StartsAt: start, EndsAt: end, UsageLimit: 1},
 			})
+			service.AddTagsToCustomer(customerId, "Club 2000")
 			break forLoop
 		default:
 

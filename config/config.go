@@ -19,7 +19,7 @@ type Config struct {
 }
 
 var shopCfg = map[string]map[string]string{
-	"development": {
+	"dev": {
 		"StoreName":   "Test Store",
 		"CountryCode": "test",
 		"StoreDomain": "test-store-hicc1.myshopify.com",

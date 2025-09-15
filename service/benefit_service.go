@@ -81,6 +81,7 @@ func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Cust
 		}
 
 	CreateDiscountCode(shopifyCustomerId, &discountCodes)
+	AddTagsToCustomer(shopifyCustomerId, "Club")
 
 	return nil
 }
@@ -285,4 +286,27 @@ func UpdateCustomerMetafield(shopifyCustomerId string, value *[]DiscountCode) {
 	// createdValueJson, _ := json.Marshal(response.Response{Data: value, Message: "succcess", Code: 0})
 	fmt.Println(resp, "更新成功")
 	// sseApp.PushToClient(shopifyCustomerId, string(createdValueJson))
+}
+
+func AddTagsToCustomer(shopifyCustomerId string, tags string) {
+	query := `#graphql
+				mutation addTags($id: ID!, $tags: [String!]!) {
+					tagsAdd(id: $id, tags: $tags) {
+					node {
+						id
+					}
+					userErrors {
+						message
+						}
+					}
+				}`
+
+	resp, err := utils.CallShopifyGraphQL(query, map[string]interface{}{
+		"id":   shopifyCustomerId,
+		"tags": tags,
+	}, "")
+	if err != nil {
+		fmt.Println("Failed to add tags:", err)
+	}
+	print(resp)
 }
