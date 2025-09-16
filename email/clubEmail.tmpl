@@ -35,9 +35,10 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 100vw;
+        width: 100%;
         background-color: #6a51b7;
         color: #fff;
+        text-align: center;
       }
 
       label {
@@ -70,11 +71,10 @@
       }
 
       .usage-wrapper {
-        display: flex;
-        align-items: center;
         font-size: 14px;
-        margin-right: 10px;
         margin-bottom: 20px;
+        line-height:40px;
+        display:flex;
       }
 
       .icon {
@@ -86,27 +86,33 @@
   </head>
 
   <body>
-    <header class="header" style="background-color: #6a51b7">
+    <div class="header" style="background-color: #6a51b7">
       <img
-        style="width: 120px; margin-top: 15px; display: block"
+        style="width: 120px; margin-top: 15px; display: inline-block"
         src="https://cdn.shopify.com/s/files/1/0635/6923/1985/files/HICC_PET_logo.png?width=500"
         alt="logo"
       />
-      <div
-        style="color: #fff; font-size: 26px; padding: 15px 0; font-weight: bold"
+      <p
+        style="
+          color: #fff;
+          font-size: 26px;
+          padding: 15px 0;
+          font-weight: bold;
+          text-align: center;
+        "
       >
         恭喜你成为Club会员
-      </div>
-    </header>
+      </p>
+    </div>
     <div class="container">
-      <div style="margin-top: 15px">您已成功创建档案，成为Club会员</div>
-      <div style="text-align: center; margin-bottom: 15px">
+      <p style="text-align: center; margin-top: 15px">您已成功创建档案，成为Club会员</p>
+      <p style="text-align: center; margin-bottom: 15px">
         以下是您的会员权益详情
-      </div>
+      </p>
 
       <h2 class="h2">会员权益详情</h2>
       <ul>
-      {{range .DiscountCodes}}
+        {{range .DiscountCodes}}
         <li>
           <div>
             <label>权益名称:</label>
@@ -122,37 +128,37 @@
           </div>
           <div class="line"></div>
         </li>
-      {{end}}
+        {{end}}
       </ul>
 
       <h2 class="h2">线下展厅使用说明</h2>
 
-      <ul>
-        <li class="usage-wrapper">
+      <div>
+        <div class="usage-wrapper">
           <img
             class="icon"
             src="https://cdn.shopify.com/s/files/1/0793/6399/7994/files/icon.png?v=1749521625"
             alt=""
           />
           <span>提前预约，联系我们，前往展厅</span>
-        </li>
-        <li class="usage-wrapper">
+        </div>
+        <div class="usage-wrapper">
           <img
             class="icon"
             src="https://cdn.shopify.com/s/files/1/0793/6399/7994/files/icon.png?v=1749521625"
             alt=""
           />
           <span>向店员出示核销码</span>
-        </li>
-        <li class="usage-wrapper">
+        </div>
+        <div class="usage-wrapper">
           <img
             class="icon"
             src="https://cdn.shopify.com/s/files/1/0793/6399/7994/files/icon.png?v=1749521625"
             alt=""
           />
           <span>同步消费记录与权益余额</span>
-        </li>
-      </ul>
+        </div>
+      </div>
 
       <div style="width: 100%; text-align: center">
         <a
@@ -171,14 +177,14 @@
         >
       </div>
     </div>
-    <footer class="footer" style="padding: 25px 0; margin-top: 55px">
+    <div class="footer" style="padding: 25px 0; margin-top: 55px">
       <div style="text-align: center">
         如有疑问，请联系我们：whatsapp | support@hiccpet.com
       </div>
       <div style="text-align: center; margin: 5px 0">
         HICC Pet SG · 5 Straits View，#01-05/06，Singapore 018935
       </div>
-      <div>©2025 HICC Pet SG</div>
-    </footer>
+      <div style="text-align: center">©2025 HICC Pet SG</div>
+    </div>
   </body>
 </html>

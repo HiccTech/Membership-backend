@@ -1,6 +1,7 @@
 package router
 
 import (
+	"hiccpet/service/email"
 	"hiccpet/service/handler"
 	"hiccpet/service/middleware"
 	"hiccpet/service/model"
@@ -75,10 +76,14 @@ func SetupRouter() *gin.Engine {
 	r.POST("/register", func(c *gin.Context) { handler.Register(c, db) })
 	r.POST("/login", func(c *gin.Context) { handler.Login(c, db) })
 
-	// r.GET("/sendEmail", func(c *gin.Context) {
-	// 	email.SendClubEmail()
-	// 	c.JSON(200, gin.H{"message": "uccessful"})
-	// })
+	r.GET("/sendEmail", func(c *gin.Context) {
+		email.SendClubEmail(email.EmailData{To: "812284688@qq.com", Subject: "Test Email", DiscountCodes: []email.DiscountCode{
+			{Title: "Test Code 1", Code: "TEST1", Period: "2024/01/01 - 2024/12/31"},
+			{Title: "Test Code 2", Code: "TEST2", Period: "2024/01/01 - 2024/12/31"},
+			{Title: "Test Code 2", Code: "TEST2", Period: "2024/01/01 - 2024/12/31"},
+		}})
+		c.JSON(200, gin.H{"message": "uccessful"})
+	})
 
 	storefront := r.Group("/storefront")
 	storefront.Use(middleware.ShopifySessionAuth())
