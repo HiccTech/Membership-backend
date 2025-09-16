@@ -133,6 +133,17 @@ forLoop:
 				if code != "" {
 					if res, err := GetCodeDiscountNodeByCode(code); err == nil {
 						fmt.Println("使用权益: ", res.CodeDiscountNodeByCode.CodeDiscount.Title)
+						email.SendClubEmail(email.EmailData{
+							To:      order.Customer.Email,
+							Subject: "权益使用通知",
+							UsedDiscountCodes: []struct {
+								Title    string
+								UsedDate string
+							}{
+								{Title: res.CodeDiscountNodeByCode.CodeDiscount.Title, UsedDate: utils.GetToday()},
+							},
+							Template: "email/usedEmail.tmpl",
+						})
 					} else {
 						fmt.Println("查询权益失败: ", err)
 					}

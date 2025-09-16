@@ -108,16 +108,19 @@
 
       <h2 class="h2">本次使用详情</h2>
       <ul>
+
+      {{ range .UsedDiscountCodes }}
         <li>
           <div>
             <label>权益名称:</label>
             <span class="perk-title">{{.Title}}</span>
           </div>
           <div>
-            <label>核销码:</label>
-            <span class="code">{{.Code}}</span>
+            <label>日期:</label>
+            <span class="code">{{.UsedDate}}</span>
           </div>
         </li>
+        {{ end }}
       </ul>
 
       <h2 class="h2">剩余权益</h2>

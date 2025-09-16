@@ -15,11 +15,15 @@ type DiscountCode struct {
 }
 
 type EmailData struct {
-	To            string
-	Subject       string
-	Template      string
-	StoreCredit   StoreCredit
-	DiscountCodes []DiscountCode
+	To                string
+	Subject           string
+	Template          string
+	StoreCredit       StoreCredit
+	DiscountCodes     []DiscountCode
+	UsedDiscountCodes []struct {
+		Title    string
+		UsedDate string
+	}
 }
 
 type StoreCredit struct {
