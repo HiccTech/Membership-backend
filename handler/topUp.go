@@ -80,7 +80,7 @@ forLoop:
 			// 充值1000
 			println("充值1000")
 			storeTopup(c, db, 1, customerId, &order)
-			service.TopupStoreCredit(customerId, "1000")
+			service.TopupStoreCredit(customerId, "1000", end)
 
 			discountCodes := []service.DiscountCode{
 				{Title: "Free Massage 10 sessions", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227740934325", StartsAt: start, EndsAt: end, UsageLimit: 10},
@@ -102,7 +102,7 @@ forLoop:
 			// 充值2000
 			println("充值2000")
 			storeTopup(c, db, 2, customerId, &order)
-			service.TopupStoreCredit(customerId, "2000")
+			service.TopupStoreCredit(customerId, "2000", end)
 			discountCodes := []service.DiscountCode{
 				{Title: "Free Massage 20 sessions", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227793035445", StartsAt: start, EndsAt: end, UsageLimit: 20},
 				{Title: "Free Aromatherapyor Grass Mud Spa", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227739754677", StartsAt: start, EndsAt: end, UsageLimit: 1},

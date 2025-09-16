@@ -159,7 +159,7 @@ func CreateDiscountCode(shopifyCustomerId string, discountCodes *[]DiscountCode)
 
 }
 
-func TopupStoreCredit(shopifyCustomerId string, amount string) {
+func TopupStoreCredit(shopifyCustomerId string, amount string, expiresAt string) {
 	query := `#graphql
 			mutation storeCreditAccountCredit($id: ID!, $creditInput: StoreCreditAccountCreditInput!) {
 				storeCreditAccountCredit(id: $id, creditInput: $creditInput) {
@@ -190,6 +190,7 @@ func TopupStoreCredit(shopifyCustomerId string, amount string) {
 				"amount":       amount,
 				"currencyCode": "SGD",
 			},
+			"expiresAt": expiresAt,
 		},
 	}, "")
 	if err != nil {
