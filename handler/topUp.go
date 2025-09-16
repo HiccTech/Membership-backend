@@ -3,10 +3,12 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"hiccpet/service/email"
 	"hiccpet/service/middleware"
 	"hiccpet/service/model"
 	"hiccpet/service/response"
 	"hiccpet/service/service"
+	"hiccpet/service/utils"
 	"io"
 	"net/http"
 
@@ -79,24 +81,44 @@ forLoop:
 			println("充值1000")
 			storeTopup(c, db, 1, customerId, &order)
 			service.TopupStoreCredit(customerId, "1000")
-			service.CreateDiscountCode(customerId, &[]service.DiscountCode{
+
+			discountCodes := []service.DiscountCode{
 				{Title: "Free Massage 10 sessions", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227740934325", StartsAt: start, EndsAt: end, UsageLimit: 10},
 				{Title: "Free Aromatherapyor Grass Mud Spa", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227739754677", StartsAt: start, EndsAt: end, UsageLimit: 1},
 				{Title: "Pet Party Venue Rental Free 1h", Code: service.GenerateDiscountCode("C"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227792937141", StartsAt: start, EndsAt: end, UsageLimit: 1},
-			})
+			}
+			service.CreateDiscountCode(customerId, &discountCodes)
 			service.AddTagsToCustomer(customerId, "Club 1000")
+			expiredAt, err := utils.FormatDate(end)
+			if err != nil {
+				fmt.Println("Error formatting date:", err)
+			}
+			service.SendEmail(
+				service.SendEmailData{ShopifyCustomerId: customerId, CustomerEmail: order.Customer.Email, Template: "email/clubEmailWithTopup.tmpl", Subject: "Thank you for your top-up of $1000", DiscountCodes: &discountCodes,
+					StoreCredit: &email.StoreCredit{Amount: 1000, Currency: "$", ExpiredAt: expiredAt}},
+			)
 			break forLoop
 		case 10228688453813:
 			// 充值2000
 			println("充值2000")
 			storeTopup(c, db, 2, customerId, &order)
 			service.TopupStoreCredit(customerId, "2000")
-			service.CreateDiscountCode(customerId, &[]service.DiscountCode{
+			discountCodes := []service.DiscountCode{
 				{Title: "Free Massage 20 sessions", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227793035445", StartsAt: start, EndsAt: end, UsageLimit: 20},
 				{Title: "Free Aromatherapyor Grass Mud Spa", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227739754677", StartsAt: start, EndsAt: end, UsageLimit: 1},
 				{Title: "Pet Party Venue Rental Free 3h", Code: service.GenerateDiscountCode("P"), CustomerGetsValuePercentage: 1, CustomerGetsProductId: "gid://shopify/Product/10227792969909", StartsAt: start, EndsAt: end, UsageLimit: 1},
-			})
+			}
+			service.CreateDiscountCode(customerId, &discountCodes)
 			service.AddTagsToCustomer(customerId, "Club 2000")
+
+			expiredAt, err := utils.FormatDate(end)
+			if err != nil {
+				fmt.Println("Error formatting date:", err)
+			}
+			service.SendEmail(
+				service.SendEmailData{ShopifyCustomerId: customerId, CustomerEmail: order.Customer.Email, Template: "email/clubEmailWithTopup.tmpl", Subject: "Thank you for your top-up of $2000", DiscountCodes: &discountCodes,
+					StoreCredit: &email.StoreCredit{Amount: 2000, Currency: "$", ExpiredAt: expiredAt}},
+			)
 			break forLoop
 		default:
 

@@ -17,12 +17,20 @@ type DiscountCode struct {
 type EmailData struct {
 	To            string
 	Subject       string
+	Template      string
+	StoreCredit   StoreCredit
 	DiscountCodes []DiscountCode
+}
+
+type StoreCredit struct {
+	Amount    float64
+	Currency  string
+	ExpiredAt string
 }
 
 func SendClubEmail(emailData EmailData) {
 
-	tmpl, err := template.ParseFiles("email/clubEmail.tmpl")
+	tmpl, err := template.ParseFiles(emailData.Template)
 	if err != nil {
 		panic(err)
 	}

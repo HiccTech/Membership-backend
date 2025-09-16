@@ -83,7 +83,7 @@ func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Cust
 
 	CreateDiscountCode(shopifyCustomerId, &discountCodes)
 	AddTagsToCustomer(shopifyCustomerId, "Club")
-	SendEmail(shopifyCustomerId, "", &discountCodes)
+	SendEmail(SendEmailData{ShopifyCustomerId: shopifyCustomerId, DiscountCodes: &discountCodes, Template: "email/clubEmail.tmpl", Subject: "Welcome to Hiccpet Club Membership"})
 
 	return nil
 }
@@ -313,8 +313,17 @@ func AddTagsToCustomer(shopifyCustomerId string, tags string) {
 	print(resp)
 }
 
-func SendEmail(shopifyCustomerId string, customerEmail string, discountCodes *[]DiscountCode) {
-	emailAddr := customerEmail
+type SendEmailData struct {
+	Subject           string
+	ShopifyCustomerId string
+	CustomerEmail     string
+	Template          string
+	DiscountCodes     *[]DiscountCode
+	StoreCredit       *email.StoreCredit
+}
+
+func SendEmail(sendEmailData SendEmailData) {
+	emailAddr := sendEmailData.CustomerEmail
 
 	if emailAddr == "" {
 		query := `#graphql
@@ -326,7 +335,7 @@ func SendEmail(shopifyCustomerId string, customerEmail string, discountCodes *[]
         }`
 
 		resp1, err := utils.CallShopifyGraphQL(query, map[string]interface{}{
-			"id": shopifyCustomerId,
+			"id": sendEmailData.ShopifyCustomerId,
 		}, "")
 		if err != nil {
 			fmt.Println("Error query:", err)
@@ -353,9 +362,9 @@ func SendEmail(shopifyCustomerId string, customerEmail string, discountCodes *[]
 		fmt.Println("查询成功:", emailAddr)
 	}
 
-	newCodes := make([]email.DiscountCode, 0, len(*discountCodes))
+	newCodes := make([]email.DiscountCode, 0, len(*sendEmailData.DiscountCodes))
 
-	for _, c := range *discountCodes {
+	for _, c := range *sendEmailData.DiscountCodes {
 		period, err := formatPeriod(c.StartsAt, c.EndsAt)
 		if err == nil {
 			newCodes = append(newCodes, email.DiscountCode{
@@ -366,11 +375,22 @@ func SendEmail(shopifyCustomerId string, customerEmail string, discountCodes *[]
 		}
 	}
 
-	email.SendClubEmail(email.EmailData{
-		To:            emailAddr,
-		Subject:       "Welcome to Hiccpet Club Membership",
-		DiscountCodes: newCodes,
-	})
+	if sendEmailData.Template == "email/clubEmail.tmpl" {
+		email.SendClubEmail(email.EmailData{
+			To:            emailAddr,
+			Subject:       sendEmailData.Subject,
+			DiscountCodes: newCodes,
+			Template:      sendEmailData.Template,
+		})
+	} else {
+		email.SendClubEmail(email.EmailData{
+			To:            emailAddr,
+			Subject:       sendEmailData.Subject,
+			DiscountCodes: newCodes,
+			Template:      sendEmailData.Template,
+			StoreCredit:   *sendEmailData.StoreCredit,
+		})
+	}
 
 }
 

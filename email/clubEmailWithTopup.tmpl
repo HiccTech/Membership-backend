@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hiccpet Club</title>
+    <style>
+      html,
+      body,
+      p {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        max-width: 375px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 auto;
+      }
+      ul,
+      li {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .header,
+      .footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        background-color: #6a51b7;
+        color: #fff;
+        text-align: center;
+      }
+
+      label {
+        color: rgba(51, 51, 51, 0.709803921568627);
+      }
+
+      .h2 {
+        color: #6a51b7;
+        text-align: center;
+        margin-bottom: 15px;
+      }
+
+      .perk-title {
+        font-weight: bold;
+        display: inline-block;
+      }
+
+      .code {
+        font-weight: 700;
+        font-style: normal;
+        color: #6a51b7;
+        background-color: #f3f1ff;
+        border-radius: 5px;
+        padding: 1px 5px;
+      }
+
+      .line {
+        border-bottom: 1px solid #e5e5e5;
+        margin: 20px 0;
+      }
+
+      .usage-wrapper {
+        font-size: 14px;
+        margin-bottom: 20px;
+        line-height: 40px;
+        display: flex;
+      }
+
+      .icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header" style="background-color: #6a51b7">
+      <img
+        style="width: 120px; margin-top: 15px; display: inline-block"
+        src="https://cdn.shopify.com/s/files/1/0635/6923/1985/files/HICC_PET_logo.png?width=500"
+        alt="logo"
+      />
+      <p
+        style="
+          color: #fff;
+          font-size: 26px;
+          padding: 5px 0;
+          font-weight: bold;
+          text-align: center;
+        "
+      >
+        Club会员充值成功通知
+      </p>
+      <p style="font-weight: bold; font-size: 22px">Store Credit:{{.StoreCredit.Currency}}{{.StoreCredit.Amount}}</p>
+      <p style="padding: 5px 0 10px">有效期至：{{.StoreCredit.ExpiredAt}}</p>
+    </div>
+    <div class="container">
+      <p style="text-align: center; margin-top: 15px">
+        您已成功充值【{{.StoreCredit.Currency}}{{.StoreCredit.Amount}}】会员套餐
+      </p>
+      <p style="text-align: center; margin-bottom: 15px">
+        以下是您的会员权益详情
+      </p>
+
+      <h2 class="h2">会员权益详情</h2>
+      <ul>
+        {{range .DiscountCodes}}
+        <li>
+          <div>
+            <label>权益名称:</label>
+            <span class="perk-title">{{.Title}}</span>
+          </div>
+          <div>
+            <label>核销码:</label>
+            <span class="code">{{.Code}}</span>
+          </div>
+          <div>
+            <label>有效期:</label>
+            <span>{{.Period}}</span>
+          </div>
+          <div class="line"></div>
+        </li>
+        {{end}}
+      </ul>
+
+      <h2 class="h2">线下展厅使用说明</h2>
+
+      <div>
+        <div class="usage-wrapper">
+          <img
+            class="icon"
+            src="https://cdn.shopify.com/s/files/1/0793/6399/7994/files/icon.png?v=1749521625"
+            alt=""
+          />
+          <span>提前预约，联系我们，前往展厅</span>
+        </div>
+        <div class="usage-wrapper">
+          <img
+            class="icon"
+            src="https://cdn.shopify.com/s/files/1/0793/6399/7994/files/icon.png?v=1749521625"
+            alt=""
+          />
+          <span>向店员出示核销码</span>
+        </div>
+        <div class="usage-wrapper">
+          <img
+            class="icon"
+            src="https://cdn.shopify.com/s/files/1/0793/6399/7994/files/icon.png?v=1749521625"
+            alt=""
+          />
+          <span>同步消费记录与权益余额</span>
+        </div>
+      </div>
+
+      <div style="width: 100%; text-align: center">
+        <a
+          href="https://shopify.com/96773669045/account/pages/a89d9d2a-d014-45fa-8dbb-1043f92aade3"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="
+            background-color: #6a51b7;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            display: inline-block;
+            text-decoration: none;
+          "
+          >前往会员中心</a
+        >
+      </div>
+    </div>
+    <div class="footer" style="padding: 25px 0; margin-top: 55px">
+      <div style="text-align: center">
+        如有疑问，请联系我们：whatsapp | support@hiccpet.com
+      </div>
+      <div style="text-align: center; margin: 5px 0">
+        HICC Pet SG · 5 Straits View，#01-05/06，Singapore 018935
+      </div>
+      <div style="text-align: center">©2025 HICC Pet SG</div>
+    </div>
+  </body>
+</html>
