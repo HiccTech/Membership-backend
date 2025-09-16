@@ -17,9 +17,10 @@ import (
 )
 
 type Order struct {
-	ID        int64      `json:"id"`
-	LineItems []LineItem `json:"line_items"`
-	Customer  Customer   `json:"customer"`
+	ID                   int64                 `json:"id"`
+	LineItems            []LineItem            `json:"line_items"`
+	Customer             Customer              `json:"customer"`
+	DiscountApplications []DiscountApplication `json:"discount_applications"`
 }
 
 type LineItem struct {
@@ -49,6 +50,11 @@ type PriceSet struct {
 type Money struct {
 	Amount       string `json:"amount"`
 	CurrencyCode string `json:"currency_code"`
+}
+
+type DiscountApplication struct {
+	Type string `json:"type"`
+	Code string `json:"code"`
 }
 
 func HandleTopUp(c *gin.Context, db *gorm.DB) {
@@ -120,6 +126,18 @@ forLoop:
 					StoreCredit: &email.StoreCredit{Amount: 2000, Currency: "$", ExpiredAt: expiredAt}},
 			)
 			break forLoop
+		case 10227739754677, 10227740934325, 10227792937141:
+			if len(order.DiscountApplications) != 0 {
+				println("权益消费 ", order.DiscountApplications[0].Code)
+				code := order.DiscountApplications[0].Code
+				if code != "" {
+					if res, err := GetCodeDiscountNodeByCode(code); err == nil {
+						fmt.Println("使用权益: ", res.CodeDiscountNodeByCode.CodeDiscount.Title)
+					} else {
+						fmt.Println("查询权益失败: ", err)
+					}
+				}
+			}
 		default:
 
 		}
