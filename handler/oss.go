@@ -19,9 +19,9 @@ var (
 	// 配置环境变量OSS_ACCESS_KEY_SECRET。
 	accessKeySecret = "2JuRTJnbAdrZNzNWCON2gDP5fMRGTt"
 	// host的格式为bucketname.endpoint。将${your-bucket}替换为Bucket名称。将${your-endpoint}替换为OSS Endpoint，例如oss-cn-hangzhou.aliyuncs.com。
-	host = "http://pet-img.oss-ap-southeast-1.aliyuncs.com"
+	host = "https://pet-img.oss-ap-southeast-1.aliyuncs.com"
 	// 指定上传到OSS的文件前缀。
-	uploadDir = "/"
+	uploadDir = ""
 	// 指定过期时间，单位为秒。
 	expireTime = int64(3600)
 )
