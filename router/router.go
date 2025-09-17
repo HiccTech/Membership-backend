@@ -126,6 +126,10 @@ func SetupRouter() *gin.Engine {
 			handler.TopupCount(c, db)
 		})
 
+		storefront.GET("getPostSignatureForOssUpload", func(c *gin.Context) {
+			handler.GetPostSignatureForOssUpload(c)
+		})
+
 	}
 
 	r.POST("/webhook/orders", middleware.ShopifyWebhookAuth(), func(c *gin.Context) {
