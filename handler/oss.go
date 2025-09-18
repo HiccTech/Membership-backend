@@ -8,16 +8,18 @@ import (
 	"fmt"
 	"hiccpet/service/response"
 	"io"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 var (
 	// 配置环境变量OSS_ACCESS_KEY_ID。
-	accessKeyId = "LTAI5tPQSWpPvx5ntKLNJZBf"
+	accessKeyId = ""
 	// 配置环境变量OSS_ACCESS_KEY_SECRET。
-	accessKeySecret = "2JuRTJnbAdrZNzNWCON2gDP5fMRGTt"
+	accessKeySecret = ""
 	// host的格式为bucketname.endpoint。将${your-bucket}替换为Bucket名称。将${your-endpoint}替换为OSS Endpoint，例如oss-cn-hangzhou.aliyuncs.com。
 	host = "https://pet-img.oss-ap-southeast-1.aliyuncs.com"
 	// 指定上传到OSS的文件前缀。
@@ -65,6 +67,10 @@ func getPolicyToken() string {
 		return ""
 	}
 
+	godotenv.Load(".oss")
+	accessKeyId = os.Getenv("AccessKeyId")
+	accessKeySecret = os.Getenv("AccessKeySecret")
+
 	encodedResult := base64.StdEncoding.EncodeToString(result)
 	h := hmac.New(sha1.New, []byte(accessKeySecret))
 	io.WriteString(h, encodedResult)
@@ -88,5 +94,6 @@ func getPolicyToken() string {
 }
 
 func GetPostSignatureForOssUpload(c *gin.Context) {
+
 	response.Success(c, getPolicyToken())
 }
