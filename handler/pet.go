@@ -15,22 +15,30 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
+type PetReq struct {
+	Phone                 string         `json:"phone"`
+	PetAvatarUrl          string         `json:"petAvatarUrl"`
+	PetName               string         `json:"petName"`
+	PetType               string         `json:"petType"`
+	Breed                 string         `json:"breed"`
+	Birthday              string         `json:"birthday"`
+	Weight                string         `json:"weight"`
+	Gender                string         `json:"gender"`
+	VaccinationRecords    int            `json:"vaccinationRecords"`
+	SterilizationStatus   int            `json:"sterilizationStatus"`
+	HasMedicalCondition   bool           `json:"hasMedicalCondition"`
+	MedicalConditionMap   datatypes.JSON `json:"medicalConditionMap"`
+	MedicalConditionOther string         `json:"medicalConditionOther"`
+	CoatType              string         `json:"coatType"`
+	GroomingFrequency     string         `json:"groomingFrequency"`
+}
+
 func AddPet(c *gin.Context, db *gorm.DB) {
-	var req struct {
-		Phone                 string `json:"phone"`
-		PetAvatarUrl          string `json:"petAvatarUrl"`
-		PetName               string `json:"petName"`
-		PetType               string `json:"petType"`
-		Breed                 string `json:"breed"`
-		PetIns                string `json:"petIns"`
-		Birthday              string `json:"birthday"`
-		Weight                string `json:"weight"`
-		Gender                string `json:"gender"`
-		AdditionalInformation string `json:"additionalInformation"`
-	}
+	var req PetReq
 
 	shopifyCustomerId := c.MustGet("shopifyClaims").(*middleware.ShopifyClaims).Sub
 
@@ -64,11 +72,16 @@ func AddPet(c *gin.Context, db *gorm.DB) {
 		PetName:               req.PetName,
 		PetType:               req.PetType,
 		Breed:                 req.Breed,
-		PetIns:                req.PetIns,
 		Birthday:              req.Birthday,
 		Weight:                req.Weight,
 		Gender:                req.Gender,
-		AdditionalInformation: req.AdditionalInformation,
+		VaccinationRecords:    &req.VaccinationRecords,
+		SterilizationStatus:   &req.SterilizationStatus,
+		HasMedicalCondition:   &req.HasMedicalCondition,
+		MedicalConditionMap:   req.MedicalConditionMap,
+		MedicalConditionOther: req.MedicalConditionOther,
+		CoatType:              req.CoatType,
+		GroomingFrequency:     req.GroomingFrequency,
 	}
 
 	if err := db.Create(&pet).Error; err != nil {
@@ -148,22 +161,13 @@ func DeletePetById(c *gin.Context, db *gorm.DB) {
 	response.Success(c, "pet deleted successfully")
 }
 
-func UpdatePetById(c *gin.Context, db *gorm.DB) {
-	type UpdatePetRequest struct {
-		Id                    uint   `json:"id" binding:"required"`
-		Phone                 string `json:"phone"`
-		PetAvatarUrl          string `json:"petAvatarUrl"`
-		PetName               string `json:"petName"`
-		PetType               string `json:"petType"`
-		Breed                 string `json:"breed"`
-		PetIns                string `json:"petIns"`
-		Birthday              string `json:"birthday"`
-		Weight                string `json:"weight"`
-		Gender                string `json:"gender"`
-		AdditionalInformation string `json:"additionalInformation"`
-	}
+type PetUpdateReq struct {
+	Id uint `json:"id" binding:"required"`
+	PetReq
+}
 
-	var req UpdatePetRequest
+func UpdatePetById(c *gin.Context, db *gorm.DB) {
+	var req PetUpdateReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid request: "+err.Error())
 		return
@@ -190,11 +194,16 @@ func UpdatePetById(c *gin.Context, db *gorm.DB) {
 		PetName:               req.PetName,
 		PetType:               req.PetType,
 		Breed:                 req.Breed,
-		PetIns:                req.PetIns,
 		Birthday:              req.Birthday,
 		Weight:                req.Weight,
 		Gender:                req.Gender,
-		AdditionalInformation: req.AdditionalInformation,
+		VaccinationRecords:    &req.VaccinationRecords,
+		SterilizationStatus:   &req.SterilizationStatus,
+		HasMedicalCondition:   &req.HasMedicalCondition,
+		MedicalConditionMap:   req.MedicalConditionMap,
+		MedicalConditionOther: req.MedicalConditionOther,
+		CoatType:              req.CoatType,
+		GroomingFrequency:     req.GroomingFrequency,
 	}
 
 	if err := db.Model(&pet).Updates(updates).Error; err != nil {
