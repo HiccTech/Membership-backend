@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"path/filepath"
 
@@ -238,4 +239,51 @@ func UploadPetAvatar(c *gin.Context, db *gorm.DB) {
 	}
 
 	response.Success(c, gin.H{"url": "/" + filename})
+}
+
+type PetListRequest struct {
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+}
+
+func GetPets(c *gin.Context, db *gorm.DB) {
+	var req PetListRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// 默认值处理
+	if req.Page < 1 {
+		req.Page = 1
+	}
+	if req.PageSize <= 0 || req.PageSize > 100 {
+		req.PageSize = 10
+	}
+
+	var pets []model.Pet
+	var total int64
+
+	// 统计总数
+	if err := db.Model(&model.Pet{}).Count(&total).Error; err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to count pets")
+		return
+	}
+
+	// 分页查询
+	if err := db.Limit(req.PageSize).
+		Offset((req.Page - 1) * req.PageSize).
+		Find(&pets).Error; err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to fetch pets")
+		return
+	}
+
+	// 返回结果
+	response.Success(c, gin.H{
+		"list":      pets,
+		"page":      req.Page,
+		"pageSize":  req.PageSize,
+		"total":     total,
+		"totalPage": int(math.Ceil(float64(total) / float64(req.PageSize))),
+	})
 }

@@ -136,10 +136,12 @@ func SetupRouter() *gin.Engine {
 		handler.HandleTopUp(c, db)
 	})
 
-	auth := r.Group("/api")
+	auth := r.Group("/admin")
 	auth.Use(middleware.JWTAuthMiddleware())
 	{
-
+		auth.POST("/pets/list", func(c *gin.Context) {
+			handler.GetPets(c, db)
+		})
 		// auth.POST("/addStore", func(c *gin.Context) { handler.AddStore(c, db) })
 		// auth.GET("/getStores", func(c *gin.Context) { handler.GetStores(c, db) })
 	}
