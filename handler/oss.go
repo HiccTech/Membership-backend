@@ -28,6 +28,13 @@ var (
 	expireTime = int64(3600)
 )
 
+func init() {
+	godotenv.Load(".oss")
+	accessKeyId = os.Getenv("OSS_ACCESS_KEY_ID")
+	accessKeySecret = os.Getenv("OSS_ACCESS_KEY_SECRET")
+
+}
+
 type ConfigStruct struct {
 	Expiration string          `json:"expiration"`
 	Conditions [][]interface{} `json:"conditions"`
@@ -67,9 +74,8 @@ func getPolicyToken() string {
 		return ""
 	}
 
-	godotenv.Load(".oss")
-	accessKeyId = os.Getenv("AccessKeyId")
-	accessKeySecret = os.Getenv("AccessKeySecret")
+	fmt.Println("AccessKeyId:", accessKeyId)
+	fmt.Println("AccessKeySecret:", accessKeySecret)
 
 	encodedResult := base64.StdEncoding.EncodeToString(result)
 	h := hmac.New(sha1.New, []byte(accessKeySecret))

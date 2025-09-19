@@ -28,12 +28,11 @@ echo "🔧 在服务器上构建并运行 Docker (环境: $ENV)..."
 ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP << EOF
 cd $SERVER_PATH
 if [[ "$ENV" == "test" ]]; then
-  ENV=testShop docker compose -f $COMPOSE_FILE --env-file .env.testShop up --build
+  docker compose -f $COMPOSE_FILE --env-file .env.testShop up -d --build
 else
-  ENV=sgShop docker compose -f $COMPOSE_FILE --env-file .env.sgShop up --build
+  docker compose -f $COMPOSE_FILE --env-file .env.sgShop up -d --build
 fi
-docker compose -f $COMPOSE_FILE down
-docker compose -f $COMPOSE_FILE up -d
+
 EOF
 
 # ---------- 3. 输出访问地址 ----------

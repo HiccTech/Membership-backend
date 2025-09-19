@@ -9,7 +9,7 @@ import (
 
 func CorsMiddleware() gin.HandlerFunc {
 	return cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173", "https://extensions.shopifycdn.com"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173", "https://extensions.shopifycdn.com", "https://api-test-club-sg.hiccpet.com"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "ngrok-skip-browser-warning"},
 		ExposeHeaders:    []string{"Content-Length"},

@@ -8,7 +8,8 @@ services:
     ports:
       - "${APP_PORT}:${APP_PORT}" # 端口映射
     env_file:
-      - .env.${ENV}   # 根据 ENV 动态选择 env 文件
+      - .env.${SHOP_ENV}   # 根据 ENV 动态选择 env 文件
+      - .oss
     depends_on:
       - membershipdb-test
 
