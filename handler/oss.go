@@ -74,9 +74,6 @@ func getPolicyToken() string {
 		return ""
 	}
 
-	fmt.Println("AccessKeyId:", accessKeyId)
-	fmt.Println("AccessKeySecret:", accessKeySecret)
-
 	encodedResult := base64.StdEncoding.EncodeToString(result)
 	h := hmac.New(sha1.New, []byte(accessKeySecret))
 	io.WriteString(h, encodedResult)
