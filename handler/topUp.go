@@ -100,7 +100,7 @@ forLoop:
 				fmt.Println("Error formatting date:", err)
 			}
 			service.SendEmail(
-				service.SendEmailData{ShopifyCustomerId: customerId, CustomerEmail: order.Customer.Email, Template: "email/clubEmailWithTopup.tmpl", Subject: "Thank you for your top-up of $1000", DiscountCodes: &discountCodes,
+				service.SendEmailData{ShopifyCustomerId: customerId, CustomerEmail: order.Customer.Email, Template: "clubEmailWithTopup.tmpl", Subject: "Thank you for your top-up of $1000", DiscountCodes: &discountCodes,
 					StoreCredit: &email.StoreCredit{Amount: 1000, Currency: "$", ExpiredAt: expiredAt}},
 			)
 			break forLoop
@@ -122,7 +122,7 @@ forLoop:
 				fmt.Println("Error formatting date:", err)
 			}
 			service.SendEmail(
-				service.SendEmailData{ShopifyCustomerId: customerId, CustomerEmail: order.Customer.Email, Template: "email/clubEmailWithTopup.tmpl", Subject: "Thank you for your top-up of $2000", DiscountCodes: &discountCodes,
+				service.SendEmailData{ShopifyCustomerId: customerId, CustomerEmail: order.Customer.Email, Template: "clubEmailWithTopup.tmpl", Subject: "Thank you for your top-up of $2000", DiscountCodes: &discountCodes,
 					StoreCredit: &email.StoreCredit{Amount: 2000, Currency: "$", ExpiredAt: expiredAt}},
 			)
 			break forLoop
@@ -142,7 +142,7 @@ forLoop:
 							}{
 								{Title: res.CodeDiscountNodeByCode.CodeDiscount.Title, UsedDate: utils.GetToday()},
 							},
-							Template: "email/usedEmail.tmpl",
+							Template: "usedEmail.tmpl",
 						})
 					} else {
 						fmt.Println("查询权益失败: ", err)

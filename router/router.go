@@ -87,7 +87,7 @@ func SetupRouter() *gin.Engine {
 			{Title: "Test Code 1", Code: "TEST1", Period: "2024/01/01 - 2024/12/31"},
 			{Title: "Test Code 2", Code: "TEST2", Period: "2024/01/01 - 2024/12/31"},
 			{Title: "Test Code 2", Code: "TEST2", Period: "2024/01/01 - 2024/12/31"},
-		}, Template: "email/clubEmailWithTopup.tmpl", StoreCredit: email.StoreCredit{ExpiredAt: "2026/12/12", Currency: "$", Amount: 2000}})
+		}, Template: "clubEmailWithTopup.tmpl", StoreCredit: email.StoreCredit{ExpiredAt: "2026/12/12", Currency: "$", Amount: 2000}})
 		c.JSON(200, gin.H{"message": "uccessful"})
 	})
 

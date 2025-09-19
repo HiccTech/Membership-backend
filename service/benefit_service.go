@@ -83,7 +83,7 @@ func GrantPetBenefit(shopifyCustomerId string, db *gorm.DB, customer *model.Cust
 
 	CreateDiscountCode(shopifyCustomerId, &discountCodes)
 	AddTagsToCustomer(shopifyCustomerId, "Club")
-	SendEmail(SendEmailData{ShopifyCustomerId: shopifyCustomerId, DiscountCodes: &discountCodes, Template: "email/clubEmail.tmpl", Subject: "Welcome to Hiccpet Club Membership"})
+	SendEmail(SendEmailData{ShopifyCustomerId: shopifyCustomerId, DiscountCodes: &discountCodes, Template: "clubEmail.tmpl", Subject: "Welcome to Hiccpet Club Membership"})
 
 	return nil
 }
@@ -376,7 +376,7 @@ func SendEmail(sendEmailData SendEmailData) {
 		}
 	}
 
-	if sendEmailData.Template == "email/clubEmail.tmpl" {
+	if sendEmailData.Template == "clubEmail.tmpl" {
 		email.SendClubEmail(email.EmailData{
 			To:            emailAddr,
 			Subject:       sendEmailData.Subject,

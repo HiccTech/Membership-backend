@@ -2,6 +2,7 @@ package email
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"html/template"
 
@@ -32,9 +33,11 @@ type StoreCredit struct {
 	ExpiredAt string
 }
 
-func SendClubEmail(emailData EmailData) {
+//go:embed *.tmpl
+var templates embed.FS
 
-	tmpl, err := template.ParseFiles(emailData.Template)
+func SendClubEmail(emailData EmailData) {
+	tmpl, err := template.ParseFS(templates, emailData.Template)
 	if err != nil {
 		panic(err)
 	}
